@@ -179,8 +179,7 @@ export default function BottomInputBar({
 
   return (
     <div
-      className="flex-shrink-0 w-full bg-[#212121] p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sticky bottom-0 z-10"
-      style={{ position: 'relative', bottom: 0 }}
+      className="flex-shrink-0 w-full bg-[#212121] p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sticky bottom-0 z-10 [touch-action:manipulation]"
     >
       {/* File chips above bar */}
       {attachments.length > 0 && (

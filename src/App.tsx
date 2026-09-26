@@ -191,7 +191,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-[100dvh] min-h-[100dvh] max-h-[100dvh] w-screen overflow-hidden bg-[#212121] text-zinc-100 font-sans select-text">
+    <div className="flex flex-col md:flex-row min-h-[100dvh] h-auto w-full overflow-auto [touch-action:auto] bg-[#212121] text-zinc-100 font-sans select-text">
       {/* Sidebar 280px desktop, drawer on mobile */}
       <Sidebar
         currentView={currentView}
@@ -214,7 +214,7 @@ export default function App() {
       />
 
       {/* Main View Area */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-0 h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#212121]">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-[#212121] overflow-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
         {/* Mobile Header Bar */}
         <div className="md:hidden h-12 bg-[#171717] border-b border-white/10 flex items-center justify-between px-4 flex-shrink-0 z-30">
           <button

@@ -128,7 +128,7 @@ export default function CodexView({
   const currentFile = files[selectedFileIndex] || null;
 
   return (
-    <div className="flex-1 flex flex-col h-full min-h-0 bg-[#212121] overflow-hidden">
+    <div className="flex-1 flex flex-col min-h-0 bg-[#212121] [touch-action:pan-x_pan-y_pinch-zoom]">
       {/* Top bar h-14 bg #171717 border-b white/10 flex justify-between px-4 */}
       <header className="h-14 bg-[#171717] border-b border-white/10 flex justify-between items-center px-4 flex-shrink-0">
         <div className="flex items-center gap-2.5">
@@ -170,7 +170,7 @@ export default function CodexView({
       </header>
 
       {/* Main flex lg:flex-row flex-col */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-auto min-h-0 [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
         {/* Left file explorer w-240px bg #1e1e1e border-r white/10 */}
         <div className="w-full lg:w-[240px] bg-[#1e1e1e] border-r border-white/10 flex flex-col flex-shrink-0">
           <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
@@ -186,7 +186,7 @@ export default function CodexView({
 
           <div className="flex-1 overflow-y-auto p-2">
             {!isBuilt ? (
-              <div className="h-32 flex items-center justify-center text-xs text-zinc-600 select-none">
+              <div className="h-32 flex items-center justify-center text-xs text-zinc-600">
                 No files yet
               </div>
             ) : (
@@ -213,12 +213,12 @@ export default function CodexView({
           </div>
         </div>
 
-        {/* Center chat flex-1 bg #212121 flex flex-col border-r white/10 */}
-        <div className="flex-1 bg-[#212121] flex flex-col border-r border-white/10 min-w-0 min-h-0 overflow-hidden relative">
-          <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-4 min-h-0">
+        {/* Center chat flex-1 bg #212121 flex flex-col border-r border-white/10 */}
+        <div className="flex-1 bg-[#212121] flex flex-col border-r border-white/10 min-w-0 min-h-0 relative [touch-action:pan-x_pan-y_pinch-zoom]">
+          <div className="flex-1 overflow-y-auto p-4 pb-4 min-h-0 [touch-action:pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
             {messages.length === 0 ? (
               /* Chat empty state */
-              <div className="h-full min-h-[340px] flex flex-col items-center justify-center text-center p-6 max-w-md mx-auto select-none">
+              <div className="h-full min-h-[340px] flex flex-col items-center justify-center text-center p-6 max-w-md mx-auto">
                 <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-4 shadow-lg">
                   <Code2 className="w-8 h-8 text-white" />
                 </div>

@@ -82,7 +82,7 @@ export default function Sidebar({
 
       {/* Sidebar container */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-50 md:z-40 w-[280px] h-[100dvh] max-h-[100dvh] bg-[#171717] border-r border-white/10 flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed md:static inset-y-0 left-0 z-50 md:z-40 w-[280px] min-h-[100dvh] md:min-h-0 md:h-full bg-[#171717] border-r border-white/10 flex flex-col transition-transform duration-300 ease-in-out ${
           isOpenMobile ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >

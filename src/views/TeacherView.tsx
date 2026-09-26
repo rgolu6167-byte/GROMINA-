@@ -152,7 +152,7 @@ export default function TeacherView({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full min-h-0 bg-[#212121] overflow-hidden relative">
+    <div className="flex-1 flex flex-col min-h-0 bg-[#212121] relative [touch-action:pan-x_pan-y_pinch-zoom]">
       {/* Top bar with centered pill toggle and right-side Compare button */}
       <div className="pt-3 pb-2 px-4 flex items-center justify-between z-10 flex-shrink-0">
         <div className="w-24" />
@@ -207,12 +207,12 @@ export default function TeacherView({
       </div>
 
       {/* Main chat stream area or Compare Grid */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 pb-4 flex flex-col min-h-0">
+      <div className="flex-1 overflow-y-auto px-4 py-4 pb-4 flex flex-col min-h-0 [touch-action:pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
         {compareMode ? (
           <CompareGrid currentPrompt={comparePrompt} responses={compareResponses} />
         ) : messages.length === 0 ? (
           /* Empty state center */
-          <div className="m-auto flex flex-col items-center justify-center text-center p-6 max-w-lg select-none">
+          <div className="m-auto flex flex-col items-center justify-center text-center p-6 max-w-lg">
             <div className="w-16 h-16 rounded-full bg-[#2f2f2f] border border-white/10 flex items-center justify-center mb-5 shadow-lg">
               <GraduationCap className="w-8 h-8 text-sky-400" />
             </div>

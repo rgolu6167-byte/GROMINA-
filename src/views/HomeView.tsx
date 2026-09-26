@@ -81,7 +81,7 @@ export default function HomeView({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full min-h-0 bg-[#212121] overflow-hidden relative">
+    <div className="flex-1 flex flex-col min-h-0 bg-[#212121] relative [touch-action:pan-x_pan-y_pinch-zoom]">
       {/* Top bar with Compare button */}
       <header className="h-14 bg-[#171717] border-b border-white/10 flex justify-between items-center px-4 flex-shrink-0 z-10">
         <div className="flex items-center gap-2.5">
@@ -110,13 +110,13 @@ export default function HomeView({
       </header>
 
       {/* Main Area */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 pb-4 flex flex-col min-h-0">
+      <div className="flex-1 overflow-y-auto px-4 py-4 pb-4 flex flex-col min-h-0 [touch-action:pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
         {compareMode ? (
           /* Compare Grid mode */
           <CompareGrid currentPrompt={comparePrompt} responses={compareResponses} />
         ) : messages.length === 0 ? (
           /* Clean Empty State - No example cards, no suggestion chips */
-          <div className="m-auto flex flex-col items-center justify-center text-center p-6 max-w-lg select-none">
+          <div className="m-auto flex flex-col items-center justify-center text-center p-6 max-w-lg">
             <div className="w-16 h-16 rounded-full bg-[#2f2f2f] border border-white/10 flex items-center justify-center mb-5 shadow-lg">
               <span className="text-2xl font-bold text-white">G</span>
             </div>
