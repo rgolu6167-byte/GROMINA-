@@ -1,0 +1,7 @@
+{
+  "name": "Gromina",
+  "description": "All-in-one AI platform featuring My Teacher, Business AI Employee, Website Builder, and Gromina Codex.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
