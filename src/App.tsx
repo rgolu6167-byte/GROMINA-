@@ -191,7 +191,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-[100dvh] h-auto w-full overflow-auto [touch-action:auto] bg-[#212121] text-zinc-100 font-sans select-text">
+    <div className="flex flex-col md:flex-row min-h-[100dvh] h-auto w-full overflow-x-auto overflow-y-auto [touch-action:auto] bg-[#212121] text-zinc-100 font-sans select-text">
       {/* Sidebar 280px desktop, drawer on mobile */}
       <Sidebar
         currentView={currentView}
@@ -214,7 +214,7 @@ export default function App() {
       />
 
       {/* Main View Area */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-[#212121] overflow-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-[#212121] overflow-x-auto overflow-y-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
         {/* Mobile Header Bar */}
         <div className="md:hidden h-12 bg-[#171717] border-b border-white/10 flex items-center justify-between px-4 flex-shrink-0 z-30">
           <button
@@ -240,6 +240,9 @@ export default function App() {
                 return [...prev, msg];
               });
             }}
+            onUpdateMessage={(id, text) => {
+              setHomeMessages(prev => prev.map(m => (m.id === id ? { ...m, text } : m)));
+            }}
             onOpenVoiceOverlay={() => setIsVoiceOverlayOpen(true)}
             onOpenCamModal={() => setIsCamModalOpen(true)}
             compareMode={compareMode}
@@ -260,6 +263,9 @@ export default function App() {
                 }
                 return [...prev, msg];
               });
+            }}
+            onUpdateMessage={(id, text) => {
+              setTeacherMessages(prev => prev.map(m => (m.id === id ? { ...m, text } : m)));
             }}
             onOpenVoiceOverlay={() => setIsVoiceOverlayOpen(true)}
             onOpenCamModal={() => setIsCamModalOpen(true)}
@@ -286,6 +292,9 @@ export default function App() {
                 return [...prev, msg];
               });
             }}
+            onUpdateMessage={(id, text) => {
+              setBusinessMessages(prev => prev.map(m => (m.id === id ? { ...m, text } : m)));
+            }}
             onOpenVoiceOverlay={() => setIsVoiceOverlayOpen(true)}
             onOpenCamModal={() => setIsCamModalOpen(true)}
           />
@@ -303,6 +312,9 @@ export default function App() {
                 }
                 return [...prev, msg];
               });
+            }}
+            onUpdateMessage={(id, text) => {
+              setCodexMessages(prev => prev.map(m => (m.id === id ? { ...m, text } : m)));
             }}
             onOpenVoiceOverlay={() => setIsVoiceOverlayOpen(true)}
             onOpenCamModal={() => setIsCamModalOpen(true)}

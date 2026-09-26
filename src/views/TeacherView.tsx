@@ -15,10 +15,12 @@ import { ChatMessage, ChatAttachment } from '../types';
 import BottomInputBar from '../components/BottomInputBar';
 import CompareGrid from '../components/CompareGrid';
 import { generateTeacherResponse, generateCompareResponses } from '../utils/aiGenerators';
+import { UserMessageActions, AiMessageActions } from '../components/MessageActions';
 
 interface TeacherViewProps {
   messages: ChatMessage[];
   onSendMessage: (msg: ChatMessage) => void;
+  onUpdateMessage?: (msgId: string, newText: string) => void;
   onOpenVoiceOverlay: () => void;
   onOpenCamModal: () => void;
   compareMode: boolean;
@@ -31,6 +33,7 @@ interface TeacherViewProps {
 export default function TeacherView({
   messages,
   onSendMessage,
+  onUpdateMessage,
   onOpenVoiceOverlay,
   onOpenCamModal,
   compareMode,
@@ -42,11 +45,85 @@ export default function TeacherView({
   const [activeTab, setActiveTab] = useState<'text' | 'voice'>('text');
   const [currentlySpeakingId, setCurrentlySpeakingId] = useState<string | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
+  const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const handleStartEdit = (msg: ChatMessage) => {
+    setEditingMsgId(msg.id);
+    setEditText(msg.text);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMsgId(null);
+    setEditText('');
+  };
+
+  const handleSaveEdit = (msgId: string) => {
+    const trimmed = editText.trim();
+    if (!trimmed) return;
+    setEditingMsgId(null);
+
+    if (onUpdateMessage) {
+      onUpdateMessage(msgId, trimmed);
+    }
+
+    // Retrigger AI teacher response
+    setTimeout(() => {
+      const teacherData = generateTeacherResponse(trimmed);
+      const assistantText = `${teacherData.overview}\n\n` +
+        teacherData.steps.map(s => `Step ${s.step}: ${s.title}\n${s.content}`).join('\n\n') +
+        `\n\n🎯 Trick: ${teacherData.proTip}\n\n❓ Question: ${teacherData.checkQuestion.question}`;
+
+      const assistantMsg: ChatMessage = {
+        id: 'ast_' + Date.now(),
+        sender: 'assistant',
+        text: assistantText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        teacherData
+      };
+      onSendMessage(assistantMsg);
+    }, 500);
+  };
+
+  const handleRetryUserPrompt = (prompt: string) => {
+    handleSend(prompt, []);
+  };
+
+  const handleRetryAiResponse = (aiMsgId: string) => {
+    const msgIndex = messages.findIndex(m => m.id === aiMsgId);
+    let prompt = '';
+    for (let i = msgIndex - 1; i >= 0; i--) {
+      if (messages[i].sender === 'user') {
+        prompt = messages[i].text;
+        break;
+      }
+    }
+    if (!prompt && lastUserPrompt) prompt = lastUserPrompt;
+    if (!prompt) return;
+
+    const teacherData = generateTeacherResponse(prompt);
+    const assistantText = `${teacherData.overview}\n\n` +
+      teacherData.steps.map(s => `Step ${s.step}: ${s.title}\n${s.content}`).join('\n\n') +
+      `\n\n🎯 Trick: ${teacherData.proTip}\n\n❓ Question: ${teacherData.checkQuestion.question}`;
+
+    if (onUpdateMessage) {
+      onUpdateMessage(aiMsgId, assistantText);
+    } else {
+      const assistantMsg: ChatMessage = {
+        id: 'ast_' + Date.now(),
+        sender: 'assistant',
+        text: assistantText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        teacherData
+      };
+      onSendMessage(assistantMsg);
+    }
+  };
 
   // Clean speech synthesis when leaving or tab change
   useEffect(() => {
@@ -207,7 +284,7 @@ export default function TeacherView({
       </div>
 
       {/* Main chat stream area or Compare Grid */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 pb-4 flex flex-col min-h-0 [touch-action:pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
+      <div className="flex-1 chat-scroll overflow-x-auto overflow-y-auto px-4 py-4 pb-4 flex flex-col min-h-0 [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
         {compareMode ? (
           <CompareGrid currentPrompt={comparePrompt} responses={compareResponses} />
         ) : messages.length === 0 ? (
@@ -226,7 +303,7 @@ export default function TeacherView({
             {messages.map(msg => (
               <div
                 key={msg.id}
-                className={`flex gap-3.5 ${
+                className={`group relative flex gap-3.5 ${
                   msg.sender === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
@@ -295,8 +372,34 @@ export default function TeacherView({
                     </div>
                   )}
 
-                  {/* Teacher structured output */}
-                  {msg.teacherData ? (
+                  {/* User message edit mode vs normal content */}
+                  {msg.sender === 'user' && editingMsgId === msg.id ? (
+                    <div className="mt-2 space-y-2">
+                      <textarea
+                        value={editText}
+                        onChange={e => setEditText(e.target.value)}
+                        className="w-full bg-[#1e1e1e] border border-white/20 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-white/40 resize-none min-h-[70px] leading-relaxed"
+                        rows={2}
+                        autoFocus
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEdit}
+                          className="px-3 py-1 text-xs text-zinc-300 hover:text-white rounded-full border border-white/10 hover:bg-white/10 transition cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSaveEdit(msg.id)}
+                          className="px-3.5 py-1 text-xs font-semibold text-black bg-white hover:bg-zinc-200 rounded-full transition cursor-pointer shadow-xs"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  ) : msg.teacherData ? (
                     <div className="space-y-4 text-sm leading-relaxed">
                       {/* Topic Title */}
                       <div className="flex items-center gap-2 text-base font-bold text-sky-300">
@@ -390,6 +493,22 @@ export default function TeacherView({
                     </div>
                   ) : (
                     <p className="whitespace-pre-wrap text-sm">{msg.text}</p>
+                  )}
+
+                  {/* Actions row for user or assistant */}
+                  {!(msg.sender === 'user' && editingMsgId === msg.id) && (
+                    msg.sender === 'user' ? (
+                      <UserMessageActions
+                        text={msg.text}
+                        onEdit={() => handleStartEdit(msg)}
+                        onRetry={() => handleRetryUserPrompt(msg.text)}
+                      />
+                    ) : (
+                      <AiMessageActions
+                        text={msg.text}
+                        onRetry={() => handleRetryAiResponse(msg.id)}
+                      />
+                    )
                   )}
                 </div>
 

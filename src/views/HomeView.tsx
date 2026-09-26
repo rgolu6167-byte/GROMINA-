@@ -1,13 +1,15 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Columns, Bot, User } from 'lucide-react';
 import { ChatMessage, ChatAttachment } from '../types';
 import BottomInputBar from '../components/BottomInputBar';
 import CompareGrid from '../components/CompareGrid';
+import { UserMessageActions, AiMessageActions } from '../components/MessageActions';
 import { generateGeneralHomeResponse, generateCompareResponses } from '../utils/aiGenerators';
 
 interface HomeViewProps {
   messages: ChatMessage[];
   onSendMessage: (msg: ChatMessage) => void;
+  onUpdateMessage?: (msgId: string, newText: string) => void;
   onOpenVoiceOverlay: () => void;
   onOpenCamModal: () => void;
   compareMode: boolean;
@@ -20,6 +22,7 @@ interface HomeViewProps {
 export default function HomeView({
   messages,
   onSendMessage,
+  onUpdateMessage,
   onOpenVoiceOverlay,
   onOpenCamModal,
   compareMode,
@@ -28,6 +31,8 @@ export default function HomeView({
   compareResponses,
   onUpdateCompareResponses
 }: HomeViewProps) {
+  const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -36,6 +41,68 @@ export default function HomeView({
 
   const compareEnabled = messages.some(m => m.sender === 'user') || messages.length > 0;
   const lastUserPrompt = [...messages].reverse().find(m => m.sender === 'user')?.text || null;
+
+  const handleStartEdit = (msg: ChatMessage) => {
+    setEditingMsgId(msg.id);
+    setEditText(msg.text);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMsgId(null);
+    setEditText('');
+  };
+
+  const handleSaveEdit = (msgId: string) => {
+    const trimmed = editText.trim();
+    if (!trimmed) return;
+    setEditingMsgId(null);
+
+    if (onUpdateMessage) {
+      onUpdateMessage(msgId, trimmed);
+    }
+
+    // Retrigger AI response
+    setTimeout(() => {
+      const reply = generateGeneralHomeResponse(trimmed);
+      const assistantMsg: ChatMessage = {
+        id: 'h_ast_' + Date.now(),
+        sender: 'assistant',
+        text: reply,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      onSendMessage(assistantMsg);
+    }, 500);
+  };
+
+  const handleRetryUserPrompt = (prompt: string) => {
+    handleSend(prompt, []);
+  };
+
+  const handleRetryAiResponse = (aiMsgId: string) => {
+    const msgIndex = messages.findIndex(m => m.id === aiMsgId);
+    let prompt = '';
+    for (let i = msgIndex - 1; i >= 0; i--) {
+      if (messages[i].sender === 'user') {
+        prompt = messages[i].text;
+        break;
+      }
+    }
+    if (!prompt && lastUserPrompt) prompt = lastUserPrompt;
+    if (!prompt) return;
+
+    const reply = generateGeneralHomeResponse(prompt);
+    if (onUpdateMessage) {
+      onUpdateMessage(aiMsgId, reply);
+    } else {
+      const assistantMsg: ChatMessage = {
+        id: 'h_ast_' + Date.now(),
+        sender: 'assistant',
+        text: reply,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      onSendMessage(assistantMsg);
+    }
+  };
 
   const handleToggle = () => {
     if (!compareEnabled) return;
@@ -110,7 +177,7 @@ export default function HomeView({
       </header>
 
       {/* Main Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 pb-4 flex flex-col min-h-0 [touch-action:pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
+      <div className="flex-1 chat-scroll overflow-x-auto overflow-y-auto px-4 py-4 pb-4 flex flex-col min-h-0 [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
         {compareMode ? (
           /* Compare Grid mode */
           <CompareGrid currentPrompt={comparePrompt} responses={compareResponses} />
@@ -131,7 +198,7 @@ export default function HomeView({
             {messages.map(msg => (
               <div
                 key={msg.id}
-                className={`flex gap-3.5 ${
+                className={`group relative flex gap-3.5 ${
                   msg.sender === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
@@ -179,7 +246,50 @@ export default function HomeView({
                     </div>
                   )}
 
-                  <p className="whitespace-pre-wrap">{msg.text}</p>
+                  {/* Message content or inline editor */}
+                  {msg.sender === 'user' && editingMsgId === msg.id ? (
+                    <div className="mt-2 space-y-2">
+                      <textarea
+                        value={editText}
+                        onChange={e => setEditText(e.target.value)}
+                        className="w-full bg-[#1e1e1e] border border-white/20 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-white/40 resize-none min-h-[70px] leading-relaxed"
+                        rows={2}
+                        autoFocus
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEdit}
+                          className="px-3 py-1 text-xs text-zinc-300 hover:text-white rounded-full border border-white/10 hover:bg-white/10 transition cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSaveEdit(msg.id)}
+                          className="px-3.5 py-1 text-xs font-semibold text-black bg-white hover:bg-zinc-200 rounded-full transition cursor-pointer shadow-xs"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="whitespace-pre-wrap">{msg.text}</p>
+                      {msg.sender === 'user' ? (
+                        <UserMessageActions
+                          text={msg.text}
+                          onEdit={() => handleStartEdit(msg)}
+                          onRetry={() => handleRetryUserPrompt(msg.text)}
+                        />
+                      ) : (
+                        <AiMessageActions
+                          text={msg.text}
+                          onRetry={() => handleRetryAiResponse(msg.id)}
+                        />
+                      )}
+                    </>
+                  )}
                 </div>
 
                 {msg.sender === 'user' && (

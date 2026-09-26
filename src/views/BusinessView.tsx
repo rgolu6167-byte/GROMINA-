@@ -12,6 +12,7 @@ import {
 import { BusinessConfig, ChatMessage, ChatAttachment, SocialConnection } from '../types';
 import BottomInputBar from '../components/BottomInputBar';
 import { generateBusinessResponse } from '../utils/aiGenerators';
+import { UserMessageActions, AiMessageActions } from '../components/MessageActions';
 
 interface BusinessViewProps {
   businessConfig: BusinessConfig;
@@ -20,6 +21,7 @@ interface BusinessViewProps {
   setIsCreated: (created: boolean) => void;
   messages: ChatMessage[];
   onSendMessage: (msg: ChatMessage) => void;
+  onUpdateMessage?: (msgId: string, newText: string) => void;
   onOpenVoiceOverlay: () => void;
   onOpenCamModal: () => void;
 }
@@ -31,9 +33,12 @@ export default function BusinessView({
   setIsCreated,
   messages,
   onSendMessage,
+  onUpdateMessage,
   onOpenVoiceOverlay,
   onOpenCamModal
 }: BusinessViewProps) {
+  const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
   // Form fields
   const [form, setForm] = useState<BusinessConfig>({
     name: businessConfig.name || '',
@@ -102,6 +107,66 @@ export default function BusinessView({
       };
       onSendMessage(botMsg);
     }, 600);
+  };
+
+  const handleStartEdit = (msg: ChatMessage) => {
+    setEditingMsgId(msg.id);
+    setEditText(msg.text);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMsgId(null);
+    setEditText('');
+  };
+
+  const handleSaveEdit = (msgId: string) => {
+    const trimmed = editText.trim();
+    if (!trimmed) return;
+    setEditingMsgId(null);
+
+    if (onUpdateMessage) {
+      onUpdateMessage(msgId, trimmed);
+    }
+
+    setTimeout(() => {
+      const reply = generateBusinessResponse(trimmed, businessConfig);
+      const botMsg: ChatMessage = {
+        id: 'b_bot_' + Date.now(),
+        sender: 'assistant',
+        text: reply,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      onSendMessage(botMsg);
+    }, 500);
+  };
+
+  const handleRetryUserPrompt = (prompt: string) => {
+    handleSend(prompt, []);
+  };
+
+  const handleRetryAiResponse = (aiMsgId: string) => {
+    const msgIndex = messages.findIndex(m => m.id === aiMsgId);
+    let prompt = '';
+    for (let i = msgIndex - 1; i >= 0; i--) {
+      if (messages[i].sender === 'user') {
+        prompt = messages[i].text;
+        break;
+      }
+    }
+    if (!prompt) return;
+
+    const reply = generateBusinessResponse(prompt, businessConfig);
+    if (onUpdateMessage) {
+      onUpdateMessage(aiMsgId, reply);
+    } else {
+      const botMsg: ChatMessage = {
+        id: 'b_bot_' + Date.now(),
+        sender: 'assistant',
+        text: reply,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      onSendMessage(botMsg);
+    }
   };
 
   // State 1: Not Created (New User setup screen)
@@ -218,7 +283,7 @@ export default function BusinessView({
             </div>
 
             {/* Chat List */}
-            <div className="bg-[#1b1b1b] border border-white/10 rounded-2xl p-4 min-h-[260px] max-h-[380px] overflow-y-auto space-y-4">
+            <div className="bg-[#1b1b1b] border border-white/10 rounded-2xl p-4 min-h-[260px] max-h-[380px] chat-scroll overflow-x-auto overflow-y-auto space-y-4">
               {messages.length === 0 ? (
                 <div className="h-44 flex flex-col items-center justify-center text-center text-zinc-500 text-xs">
                   <Bot className="w-8 h-8 text-zinc-600 mb-2" />
@@ -228,7 +293,7 @@ export default function BusinessView({
                 messages.map(msg => (
                   <div
                     key={msg.id}
-                    className={`flex gap-3 ${
+                    className={`group relative flex gap-3 ${
                       msg.sender === 'user' ? 'justify-end' : 'justify-start'
                     }`}
                   >
@@ -244,10 +309,53 @@ export default function BusinessView({
                           : 'bg-[#262626] text-zinc-200 border border-white/10'
                       }`}
                     >
-                      <p className="whitespace-pre-wrap">{msg.text}</p>
-                      <span className="block text-[10px] text-zinc-500 text-right mt-1.5">
-                        {msg.timestamp}
-                      </span>
+                      {/* Message content or inline editor */}
+                      {msg.sender === 'user' && editingMsgId === msg.id ? (
+                        <div className="mt-1 space-y-2">
+                          <textarea
+                            value={editText}
+                            onChange={e => setEditText(e.target.value)}
+                            className="w-full bg-[#1e1e1e] border border-white/20 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-white/40 resize-none min-h-[60px] leading-relaxed"
+                            rows={2}
+                            autoFocus
+                          />
+                          <div className="flex justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={handleCancelEdit}
+                              className="px-2.5 py-0.5 text-[11px] text-zinc-300 hover:text-white rounded-full border border-white/10 hover:bg-white/10 transition cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSaveEdit(msg.id)}
+                              className="px-3 py-0.5 text-[11px] font-semibold text-black bg-white hover:bg-zinc-200 rounded-full transition cursor-pointer shadow-xs"
+                            >
+                              Save
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="whitespace-pre-wrap">{msg.text}</p>
+                          <span className="block text-[10px] text-zinc-500 text-right mt-1.5">
+                            {msg.timestamp}
+                          </span>
+                          {msg.sender === 'user' ? (
+                            <UserMessageActions
+                              text={msg.text}
+                              onEdit={() => handleStartEdit(msg)}
+                              onRetry={() => handleRetryUserPrompt(msg.text)}
+                            />
+                          ) : (
+                            <AiMessageActions
+                              text={msg.text}
+                              onRetry={() => handleRetryAiResponse(msg.id)}
+                            />
+                          )}
+                        </>
+                      )}
                     </div>
                     {msg.sender === 'user' && (
                       <div className="w-7 h-7 rounded-full bg-zinc-700 text-white flex items-center justify-center flex-shrink-0 text-xs">

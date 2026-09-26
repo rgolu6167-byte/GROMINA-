@@ -22,10 +22,12 @@ import BottomInputBar from '../components/BottomInputBar';
 import { generateCodexFiles } from '../utils/aiGenerators';
 import GitHubModal from '../components/GitHubModal';
 import DeployModal from '../components/DeployModal';
+import { UserMessageActions, AiMessageActions } from '../components/MessageActions';
 
 interface CodexViewProps {
   messages: ChatMessage[];
   onSendMessage: (msg: ChatMessage) => void;
+  onUpdateMessage?: (msgId: string, newText: string) => void;
   onOpenVoiceOverlay: () => void;
   onOpenCamModal: () => void;
 }
@@ -33,6 +35,7 @@ interface CodexViewProps {
 export default function CodexView({
   messages,
   onSendMessage,
+  onUpdateMessage,
   onOpenVoiceOverlay,
   onOpenCamModal
 }: CodexViewProps) {
@@ -40,6 +43,8 @@ export default function CodexView({
   const [selectedFileIndex, setSelectedFileIndex] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isBuilt, setIsBuilt] = useState(false);
+  const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
 
   // Right panel states
   const [activeTab, setActiveTab] = useState<'code' | 'preview' | 'terminal'>('code');
@@ -103,6 +108,90 @@ export default function CodexView({
       };
       onSendMessage(assistantMsg);
     }, 1500);
+  };
+
+  const handleStartEdit = (msg: ChatMessage) => {
+    setEditingMsgId(msg.id);
+    setEditText(msg.text);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMsgId(null);
+    setEditText('');
+  };
+
+  const handleSaveEdit = (msgId: string) => {
+    const trimmed = editText.trim();
+    if (!trimmed) return;
+    setEditingMsgId(null);
+
+    if (onUpdateMessage) {
+      onUpdateMessage(msgId, trimmed);
+    }
+
+    setIsGenerating(true);
+    setTimeout(() => {
+      const generated = generateCodexFiles(trimmed);
+      setFiles(generated);
+      setSelectedFileIndex(0);
+      setIsBuilt(true);
+      setIsGenerating(false);
+
+      const assistantMsg: ChatMessage = {
+        id: 'cdx_ast_' + Date.now(),
+        sender: 'assistant',
+        text: `I've updated the codebase for: "${trimmed.slice(0, 30)}...". Generated ${generated.length} files: ${generated.map(f => f.name).join(', ')}.`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        codexData: {
+          summary: `Successfully generated ${generated.length} files.`,
+          generatedFiles: generated.map(f => f.name),
+          terminalCommand: 'npm run build'
+        }
+      };
+      onSendMessage(assistantMsg);
+    }, 1200);
+  };
+
+  const handleRetryUserPrompt = (prompt: string) => {
+    handleSendPrompt(prompt, []);
+  };
+
+  const handleRetryAiResponse = (aiMsgId: string) => {
+    const msgIndex = messages.findIndex(m => m.id === aiMsgId);
+    let prompt = '';
+    for (let i = msgIndex - 1; i >= 0; i--) {
+      if (messages[i].sender === 'user') {
+        prompt = messages[i].text;
+        break;
+      }
+    }
+    if (!prompt) return;
+
+    setIsGenerating(true);
+    setTimeout(() => {
+      const generated = generateCodexFiles(prompt);
+      setFiles(generated);
+      setSelectedFileIndex(0);
+      setIsBuilt(true);
+      setIsGenerating(false);
+
+      const assistantMsg: ChatMessage = {
+        id: 'cdx_ast_' + Date.now(),
+        sender: 'assistant',
+        text: `Regenerated codebase for "${prompt.slice(0, 30)}...". Generated ${generated.length} files: ${generated.map(f => f.name).join(', ')}.`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        codexData: {
+          summary: `Re-generated ${generated.length} files.`,
+          generatedFiles: generated.map(f => f.name),
+          terminalCommand: 'npm run build'
+        }
+      };
+      if (onUpdateMessage) {
+        onUpdateMessage(aiMsgId, assistantMsg.text);
+      } else {
+        onSendMessage(assistantMsg);
+      }
+    }, 1200);
   };
 
   const handleRun = () => {
@@ -215,7 +304,7 @@ export default function CodexView({
 
         {/* Center chat flex-1 bg #212121 flex flex-col border-r border-white/10 */}
         <div className="flex-1 bg-[#212121] flex flex-col border-r border-white/10 min-w-0 min-h-0 relative [touch-action:pan-x_pan-y_pinch-zoom]">
-          <div className="flex-1 overflow-y-auto p-4 pb-4 min-h-0 [touch-action:pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
+          <div className="flex-1 chat-scroll overflow-x-auto overflow-y-auto p-4 pb-4 min-h-0 [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
             {messages.length === 0 ? (
               /* Chat empty state */
               <div className="h-full min-h-[340px] flex flex-col items-center justify-center text-center p-6 max-w-md mx-auto">
@@ -232,7 +321,7 @@ export default function CodexView({
                 {messages.map(msg => (
                   <div
                     key={msg.id}
-                    className={`flex gap-3 ${
+                    className={`group relative flex gap-3 ${
                       msg.sender === 'user' ? 'justify-end' : 'justify-start'
                     }`}
                   >
@@ -248,30 +337,74 @@ export default function CodexView({
                           : 'bg-[#262626] text-zinc-200 border border-white/10 shadow-md space-y-3'
                       }`}
                     >
-                      <p className="whitespace-pre-wrap">{msg.text}</p>
-
-                      {msg.codexData && (
-                        <div className="bg-[#1b1b1b] rounded-xl p-3 border border-white/5 space-y-2">
-                          <div className="flex items-center gap-1.5 text-emerald-400 text-[11px] font-semibold">
-                            <CheckCircle className="w-3.5 h-3.5" />
-                            <span>{msg.codexData.summary}</span>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5">
-                            {msg.codexData.generatedFiles.map(fn => (
-                              <span
-                                key={fn}
-                                className="bg-white/5 border border-white/5 text-zinc-300 font-mono text-[10px] px-2 py-0.5 rounded"
-                              >
-                                {fn}
-                              </span>
-                            ))}
+                      {/* User message edit mode vs normal content */}
+                      {msg.sender === 'user' && editingMsgId === msg.id ? (
+                        <div className="space-y-2">
+                          <textarea
+                            value={editText}
+                            onChange={e => setEditText(e.target.value)}
+                            className="w-full bg-[#1e1e1e] border border-white/20 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-white/40 resize-none min-h-[60px] leading-relaxed"
+                            rows={2}
+                            autoFocus
+                          />
+                          <div className="flex justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={handleCancelEdit}
+                              className="px-2.5 py-1 text-[11px] text-zinc-300 hover:text-white rounded-full border border-white/10 hover:bg-white/10 transition cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSaveEdit(msg.id)}
+                              className="px-3.5 py-1 text-[11px] font-semibold text-black bg-white hover:bg-zinc-200 rounded-full transition cursor-pointer shadow-xs"
+                            >
+                              Save
+                            </button>
                           </div>
                         </div>
-                      )}
+                      ) : (
+                        <>
+                          <p className="whitespace-pre-wrap">{msg.text}</p>
 
-                      <span className="block text-[10px] text-zinc-500 text-right">
-                        {msg.timestamp}
-                      </span>
+                          {msg.codexData && (
+                            <div className="bg-[#1b1b1b] rounded-xl p-3 border border-white/5 space-y-2">
+                              <div className="flex items-center gap-1.5 text-emerald-400 text-[11px] font-semibold">
+                                <CheckCircle className="w-3.5 h-3.5" />
+                                <span>{msg.codexData.summary}</span>
+                              </div>
+                              <div className="flex flex-wrap gap-1.5">
+                                {msg.codexData.generatedFiles.map(fn => (
+                                  <span
+                                    key={fn}
+                                    className="bg-white/5 border border-white/5 text-zinc-300 font-mono text-[10px] px-2 py-0.5 rounded"
+                                  >
+                                    {fn}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          <span className="block text-[10px] text-zinc-500 text-right">
+                            {msg.timestamp}
+                          </span>
+
+                          {msg.sender === 'user' ? (
+                            <UserMessageActions
+                              text={msg.text}
+                              onEdit={() => handleStartEdit(msg)}
+                              onRetry={() => handleRetryUserPrompt(msg.text)}
+                            />
+                          ) : (
+                            <AiMessageActions
+                              text={msg.text}
+                              onRetry={() => handleRetryAiResponse(msg.id)}
+                            />
+                          )}
+                        </>
+                      )}
                     </div>
                     {msg.sender === 'user' && (
                       <div className="w-7 h-7 rounded-full bg-zinc-700 text-white flex items-center justify-center flex-shrink-0 text-xs mt-0.5">

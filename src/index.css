@@ -3,7 +3,8 @@
 @layer base {
   html {
     height: 100%;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: auto;
     touch-action: pan-x pan-y pinch-zoom;
     -webkit-text-size-adjust: 100%;
     background-color: #212121;
@@ -16,7 +17,8 @@
 
   body {
     min-height: 100%;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: auto;
     touch-action: pan-x pan-y pinch-zoom;
     overscroll-behavior-y: auto;
     background-color: #212121;
@@ -29,10 +31,30 @@
 
   #root {
     min-height: 100dvh;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: auto;
     touch-action: pan-x pan-y pinch-zoom;
     width: 100%;
   }
+
+  * {
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+
+  input,
+  textarea,
+  button,
+  select {
+    touch-action: manipulation;
+  }
+}
+
+.chat-scroll {
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y pinch-zoom;
+  overscroll-behavior: contain;
 }
 
 /* Custom scrollbars for dark theme */
