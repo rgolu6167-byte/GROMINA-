@@ -56,7 +56,7 @@ export default function WebsiteView() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#212121] overflow-hidden">
+    <div className="flex-1 flex flex-col h-full min-h-0 bg-[#212121] overflow-hidden">
       {/* Top bar h-14 bg #171717 border-b white/10 */}
       <header className="h-14 bg-[#171717] border-b border-white/10 flex justify-between items-center px-4 flex-shrink-0">
         <div className="flex items-center gap-2.5">
@@ -89,8 +89,8 @@ export default function WebsiteView() {
         </div>
       </header>
 
-      {/* Main flex h-[calc(100vh-56px)] flex-col md:flex-row */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+      {/* Main flex flex-col md:flex-row */}
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
         {/* Left panel w-380px border-r white/10 bg #1e1e1e flex flex-col */}
         <div className="w-full md:w-[380px] border-r border-white/10 bg-[#1e1e1e] flex flex-col flex-shrink-0">
           <label className="px-4 pt-4 text-sm text-zinc-400 font-medium">

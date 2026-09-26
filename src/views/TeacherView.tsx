@@ -152,9 +152,9 @@ export default function TeacherView({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#212121] overflow-hidden relative">
+    <div className="flex-1 flex flex-col h-full min-h-0 bg-[#212121] overflow-hidden relative">
       {/* Top bar with centered pill toggle and right-side Compare button */}
-      <div className="pt-3 pb-2 px-4 flex items-center justify-between z-10">
+      <div className="pt-3 pb-2 px-4 flex items-center justify-between z-10 flex-shrink-0">
         <div className="w-24" />
 
         {/* Center pill toggle */}
@@ -207,7 +207,7 @@ export default function TeacherView({
       </div>
 
       {/* Main chat stream area or Compare Grid */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 pb-4 flex flex-col min-h-0">
         {compareMode ? (
           <CompareGrid currentPrompt={comparePrompt} responses={compareResponses} />
         ) : messages.length === 0 ? (

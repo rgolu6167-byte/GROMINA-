@@ -178,10 +178,13 @@ export default function BottomInputBar({
   const hasContent = text.trim().length > 0 || attachments.length > 0;
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-4 sticky bottom-0 bg-[#212121] z-20">
+    <div
+      className="flex-shrink-0 w-full bg-[#212121] p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sticky bottom-0 z-10"
+      style={{ position: 'relative', bottom: 0 }}
+    >
       {/* File chips above bar */}
       {attachments.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-2 px-1">
+        <div className="max-w-3xl mx-auto flex flex-wrap gap-2 mb-2 px-1">
           {attachments.map(att => (
             <div
               key={att.id}
@@ -195,6 +198,7 @@ export default function BottomInputBar({
               <span className="max-w-[140px] truncate">{att.name}</span>
               {att.size && <span className="text-[10px] text-zinc-500">({att.size})</span>}
               <button
+                type="button"
                 onClick={() => removeAttachment(att.id)}
                 className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-white/10 text-zinc-400 hover:text-white transition"
               >
@@ -206,7 +210,7 @@ export default function BottomInputBar({
       )}
 
       {/* Inner Input Box */}
-      <div className="relative bg-[#2f2f2f] border border-white/10 rounded-2xl px-3 py-2.5 flex items-end gap-2 shadow-lg">
+      <div className="max-w-3xl mx-auto bg-[#2f2f2f] border border-white/10 rounded-2xl px-3 py-2.5 flex items-end gap-2 w-full shadow-lg relative">
         {/* Left: Plus button with popup menu */}
         <div className="relative flex-shrink-0" ref={menuRef}>
           <button
@@ -277,7 +281,7 @@ export default function BottomInputBar({
             placeholder={placeholder}
             rows={1}
             disabled={disabled}
-            className="w-full min-h-[24px] max-h-[120px] bg-transparent border-0 outline-none resize-none text-white text-sm placeholder:text-zinc-500 leading-6 px-1 scrollbar-none"
+            className="w-full min-h-[24px] max-h-[120px] overflow-y-auto bg-transparent border-0 outline-none resize-none text-white text-sm placeholder:text-zinc-500 leading-6 px-1 scrollbar-none"
           />
         </div>
 

@@ -81,7 +81,7 @@ export default function HomeView({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#212121] overflow-hidden relative">
+    <div className="flex-1 flex flex-col h-full min-h-0 bg-[#212121] overflow-hidden relative">
       {/* Top bar with Compare button */}
       <header className="h-14 bg-[#171717] border-b border-white/10 flex justify-between items-center px-4 flex-shrink-0 z-10">
         <div className="flex items-center gap-2.5">
@@ -110,7 +110,7 @@ export default function HomeView({
       </header>
 
       {/* Main Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 pb-4 flex flex-col min-h-0">
         {compareMode ? (
           /* Compare Grid mode */
           <CompareGrid currentPrompt={comparePrompt} responses={compareResponses} />

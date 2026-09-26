@@ -66,40 +66,34 @@ export default function App() {
   const [isCamModalOpen, setIsCamModalOpen] = useState(false);
   const [isVoiceOverlayOpen, setIsVoiceOverlayOpen] = useState(false);
 
-  // Chat History list
+  // Chat History list - initially empty for new user
   const [chatHistory, setChatHistory] = useState<
     { id: string; title: string; view: FeatureView; date: string }[]
-  >([
-    {
-      id: 'hist_1',
-      title: 'Physics - Newton Laws',
-      view: 'teacher',
-      date: 'Today'
-    },
-    {
-      id: 'hist_2',
-      title: 'E-commerce Support Bot',
-      view: 'business',
-      date: 'Yesterday'
-    },
-    {
-      id: 'hist_3',
-      title: 'Portfolio Site Build',
-      view: 'website',
-      date: 'Sep 24'
-    },
-    {
-      id: 'hist_4',
-      title: 'REST API Authentication',
-      view: 'codex',
-      date: 'Sep 22'
-    }
-  ]);
+  >([]);
+
+  const pushChatToHistory = (title: string, view: FeatureView) => {
+    const trimmedTitle = title.trim().slice(0, 30) || 'New Conversation';
+    setChatHistory(prev => {
+      // If previous entry was 'New Chat', update its title
+      if (prev.length > 0 && prev[0].title === 'New Chat') {
+        return [{ ...prev[0], title: trimmedTitle, view }, ...prev.slice(1)];
+      }
+      return [
+        {
+          id: 'hist_' + Date.now(),
+          title: trimmedTitle,
+          view,
+          date: 'Today'
+        },
+        ...prev
+      ];
+    });
+  };
 
   /**
    * 1. New Chat behavior:
    * Must setActiveView to home, setMessages to empty array, clear compare states,
-   * and close mobile drawer.
+   * close mobile drawer, and push new chat to history dynamically.
    */
   const handleNewChat = () => {
     setCurrentView('home');
@@ -108,6 +102,13 @@ export default function App() {
     setComparePrompt(null);
     setCompareResponses(null);
     setIsMobileMenuOpen(false);
+
+    // Push real new chat to history dynamically
+    const newId = 'hist_' + Date.now();
+    setChatHistory(prev => [
+      { id: newId, title: 'New Chat', view: 'home', date: 'Today' },
+      ...prev
+    ]);
   };
 
   const handleSelectHistoryItem = (item: {
@@ -190,7 +191,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#212121] text-zinc-100 font-sans select-text">
+    <div className="flex h-[100dvh] min-h-[100dvh] max-h-[100dvh] w-screen overflow-hidden bg-[#212121] text-zinc-100 font-sans select-text">
       {/* Sidebar 280px desktop, drawer on mobile */}
       <Sidebar
         currentView={currentView}
@@ -213,7 +214,7 @@ export default function App() {
       />
 
       {/* Main View Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-[#212121]">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0 h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#212121]">
         {/* Mobile Header Bar */}
         <div className="md:hidden h-12 bg-[#171717] border-b border-white/10 flex items-center justify-between px-4 flex-shrink-0 z-30">
           <button
@@ -231,7 +232,14 @@ export default function App() {
         {currentView === 'home' && (
           <HomeView
             messages={homeMessages}
-            onSendMessage={msg => setHomeMessages(prev => [...prev, msg])}
+            onSendMessage={msg => {
+              setHomeMessages(prev => {
+                if (prev.length === 0 && msg.sender === 'user') {
+                  pushChatToHistory(msg.text, 'home');
+                }
+                return [...prev, msg];
+              });
+            }}
             onOpenVoiceOverlay={() => setIsVoiceOverlayOpen(true)}
             onOpenCamModal={() => setIsCamModalOpen(true)}
             compareMode={compareMode}
@@ -245,7 +253,14 @@ export default function App() {
         {currentView === 'teacher' && (
           <TeacherView
             messages={teacherMessages}
-            onSendMessage={msg => setTeacherMessages(prev => [...prev, msg])}
+            onSendMessage={msg => {
+              setTeacherMessages(prev => {
+                if (prev.length === 0 && msg.sender === 'user') {
+                  pushChatToHistory(msg.text, 'teacher');
+                }
+                return [...prev, msg];
+              });
+            }}
             onOpenVoiceOverlay={() => setIsVoiceOverlayOpen(true)}
             onOpenCamModal={() => setIsCamModalOpen(true)}
             compareMode={compareMode}
@@ -263,7 +278,14 @@ export default function App() {
             isCreated={isBusinessCreated}
             setIsCreated={setIsBusinessCreated}
             messages={businessMessages}
-            onSendMessage={msg => setBusinessMessages(prev => [...prev, msg])}
+            onSendMessage={msg => {
+              setBusinessMessages(prev => {
+                if (prev.length === 0 && msg.sender === 'user') {
+                  pushChatToHistory(msg.text, 'business');
+                }
+                return [...prev, msg];
+              });
+            }}
             onOpenVoiceOverlay={() => setIsVoiceOverlayOpen(true)}
             onOpenCamModal={() => setIsCamModalOpen(true)}
           />
@@ -274,7 +296,14 @@ export default function App() {
         {currentView === 'codex' && (
           <CodexView
             messages={codexMessages}
-            onSendMessage={msg => setCodexMessages(prev => [...prev, msg])}
+            onSendMessage={msg => {
+              setCodexMessages(prev => {
+                if (prev.length === 0 && msg.sender === 'user') {
+                  pushChatToHistory(msg.text, 'codex');
+                }
+                return [...prev, msg];
+              });
+            }}
             onOpenVoiceOverlay={() => setIsVoiceOverlayOpen(true)}
             onOpenCamModal={() => setIsCamModalOpen(true)}
           />

@@ -82,7 +82,7 @@ export default function Sidebar({
 
       {/* Sidebar container */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-40 w-[280px] bg-[#171717] border-r border-white/10 flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed md:static inset-y-0 left-0 z-50 md:z-40 w-[280px] h-[100dvh] max-h-[100dvh] bg-[#171717] border-r border-white/10 flex flex-col transition-transform duration-300 ease-in-out ${
           isOpenMobile ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
@@ -174,8 +174,9 @@ export default function Sidebar({
           </div>
           <div className="flex-1 overflow-y-auto space-y-1 pr-1 py-1">
             {chatHistory.length === 0 ? (
-              <div className="py-6 text-center text-xs text-zinc-600 select-none">
-                No recent conversations
+              <div className="h-full min-h-[140px] flex flex-col items-center justify-center text-center p-4 text-zinc-500 select-none">
+                <MessageSquare className="w-5 h-5 mb-2 text-zinc-500 stroke-[1.5]" />
+                <span className="text-xs text-zinc-500 font-medium">No chat history yet</span>
               </div>
             ) : (
               chatHistory.map(item => (

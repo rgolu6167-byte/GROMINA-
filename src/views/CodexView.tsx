@@ -128,7 +128,7 @@ export default function CodexView({
   const currentFile = files[selectedFileIndex] || null;
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#212121] overflow-hidden">
+    <div className="flex-1 flex flex-col h-full min-h-0 bg-[#212121] overflow-hidden">
       {/* Top bar h-14 bg #171717 border-b white/10 flex justify-between px-4 */}
       <header className="h-14 bg-[#171717] border-b border-white/10 flex justify-between items-center px-4 flex-shrink-0">
         <div className="flex items-center gap-2.5">
@@ -169,8 +169,8 @@ export default function CodexView({
         </div>
       </header>
 
-      {/* Main flex lg:flex-row flex-col h-[calc(100vh-56px)] */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+      {/* Main flex lg:flex-row flex-col */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
         {/* Left file explorer w-240px bg #1e1e1e border-r white/10 */}
         <div className="w-full lg:w-[240px] bg-[#1e1e1e] border-r border-white/10 flex flex-col flex-shrink-0">
           <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
@@ -214,8 +214,8 @@ export default function CodexView({
         </div>
 
         {/* Center chat flex-1 bg #212121 flex flex-col border-r white/10 */}
-        <div className="flex-1 bg-[#212121] flex flex-col border-r border-white/10 min-w-0 overflow-hidden relative">
-          <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 bg-[#212121] flex flex-col border-r border-white/10 min-w-0 min-h-0 overflow-hidden relative">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-4 min-h-0">
             {messages.length === 0 ? (
               /* Chat empty state */
               <div className="h-full min-h-[340px] flex flex-col items-center justify-center text-center p-6 max-w-md mx-auto select-none">
@@ -303,7 +303,7 @@ export default function CodexView({
         </div>
 
         {/* Right panel w-520px bg #0a0a0a flex flex-col */}
-        <div className="w-full lg:w-[520px] bg-[#0a0a0a] flex flex-col flex-shrink-0 overflow-hidden">
+        <div className="w-full lg:w-[520px] bg-[#0a0a0a] flex flex-col flex-shrink-0 min-h-0 overflow-hidden">
           {/* Toolbar h-11 bg #171717 border-b white/10 */}
           <div className="h-11 bg-[#171717] border-b border-white/10 flex justify-between items-center px-3 flex-shrink-0">
             <div className="bg-[#2f2f2f] rounded-full p-1 border border-white/10 flex items-center shadow-xs">

@@ -107,7 +107,7 @@ export default function BusinessView({
   // State 1: Not Created (New User setup screen)
   if (!isCreated) {
     return (
-      <div className="flex-1 overflow-y-auto bg-[#212121] p-6 flex flex-col justify-center">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 bg-[#212121] p-6 flex flex-col justify-center">
         <div className="w-full max-w-[560px] mx-auto mt-4 mb-8">
           {/* Header */}
           <div className="text-center mb-6">
@@ -185,8 +185,8 @@ export default function BusinessView({
 
   // State 2: Created (Testing & Channel integrations)
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#212121] overflow-hidden relative">
-      <div className="flex-1 overflow-y-auto px-4 py-6">
+    <div className="flex-1 flex flex-col h-full min-h-0 bg-[#212121] overflow-hidden relative">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 pb-4 min-h-0">
         <div className="max-w-3xl mx-auto space-y-8 pb-10">
           {/* Summary Card */}
           <div className="bg-[#2f2f2f] border border-white/10 rounded-2xl p-5 shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
