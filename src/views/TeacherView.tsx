@@ -48,9 +48,10 @@ export default function TeacherView({
   const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const teacherScrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages]);
 
   const handleStartEdit = (msg: ChatMessage) => {
@@ -284,7 +285,7 @@ export default function TeacherView({
       </div>
 
       {/* Main chat stream area or Compare Grid */}
-      <div className="flex-1 chat-scroll overflow-x-auto overflow-y-auto px-4 py-4 pb-4 flex flex-col min-h-0 [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
+      <div ref={teacherScrollRef} className="chat-scroll flex-1 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth px-4 py-4 pb-4 flex flex-col min-h-0">
         {compareMode ? (
           <CompareGrid currentPrompt={comparePrompt} responses={compareResponses} />
         ) : messages.length === 0 ? (
@@ -295,7 +296,7 @@ export default function TeacherView({
             </div>
             <h2 className="text-2xl font-bold text-white tracking-tight mb-2">My Teacher</h2>
             <p className="text-zinc-400 text-sm leading-relaxed max-w-md">
-              Koi bhi topic pucho, teacher ki tarah step-by-step samjhaunga. Text aur Voice dono me.
+              Ask any topic, I'll explain step-by-step like a teacher. In both Text and Voice.
             </p>
           </div>
         ) : (
@@ -529,7 +530,7 @@ export default function TeacherView({
         onSendMessage={handleSend}
         onOpenVoiceOverlay={onOpenVoiceOverlay}
         onOpenCamModal={onOpenCamModal}
-        placeholder={compareMode ? 'Ask to compare...' : 'Ask anything'}
+        placeholder={compareMode ? 'Ask to compare...' : 'Ask any topic...'}
       />
     </div>
   );

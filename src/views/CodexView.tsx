@@ -58,6 +58,7 @@ export default function CodexView({
   const [isDeployOpen, setIsDeployOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const codexScrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -304,7 +305,7 @@ export default function CodexView({
 
         {/* Center chat flex-1 bg #212121 flex flex-col border-r border-white/10 */}
         <div className="flex-1 bg-[#212121] flex flex-col border-r border-white/10 min-w-0 min-h-0 relative [touch-action:pan-x_pan-y_pinch-zoom]">
-          <div className="flex-1 chat-scroll overflow-x-auto overflow-y-auto p-4 pb-4 min-h-0 [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
+          <div ref={codexScrollRef} className="chat-scroll flex-1 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth p-4 pb-4 min-h-0">
             {messages.length === 0 ? (
               /* Chat empty state */
               <div className="h-full min-h-[340px] flex flex-col items-center justify-center text-center p-6 max-w-md mx-auto">
@@ -436,7 +437,7 @@ export default function CodexView({
         </div>
 
         {/* Right panel w-520px bg #0a0a0a flex flex-col */}
-        <div className="w-full lg:w-[520px] bg-[#0a0a0a] flex flex-col flex-shrink-0 min-h-0 overflow-hidden">
+        <div className="w-full lg:w-[520px] bg-[#0a0a0a] flex flex-col flex-shrink-0 min-h-0 overflow-y-auto overflow-x-auto">
           {/* Toolbar h-11 bg #171717 border-b white/10 */}
           <div className="h-11 bg-[#171717] border-b border-white/10 flex justify-between items-center px-3 flex-shrink-0">
             <div className="bg-[#2f2f2f] rounded-full p-1 border border-white/10 flex items-center shadow-xs">

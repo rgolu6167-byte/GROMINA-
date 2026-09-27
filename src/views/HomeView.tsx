@@ -34,9 +34,11 @@ export default function HomeView({
   const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const homeScrollRef = useRef<HTMLDivElement | null>(null);
 
+  // Auto-scroll like ChatGPT on new user message or AI answer
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages]);
 
   const compareEnabled = messages.some(m => m.sender === 'user') || messages.length > 0;
@@ -121,7 +123,7 @@ export default function HomeView({
       return;
     }
 
-    // Normal chat mode
+    // Normal mode: append user message
     const userMsg: ChatMessage = {
       id: 'h_usr_' + Date.now(),
       sender: 'user',
@@ -131,10 +133,11 @@ export default function HomeView({
     };
     onSendMessage(userMsg);
 
-    // Prepare compare responses for this question so it's ready when Compare is clicked
+    // Prepare compare responses in background so Compare is instant if clicked
     const responses = generateCompareResponses(text);
     onUpdateCompareResponses(text, responses);
 
+    // Normal assistant reply after short realistic delay
     setTimeout(() => {
       const reply = generateGeneralHomeResponse(text);
       const assistantMsg: ChatMessage = {
@@ -176,13 +179,13 @@ export default function HomeView({
         </button>
       </header>
 
-      {/* Main Area */}
-      <div className="flex-1 chat-scroll overflow-x-auto overflow-y-auto px-4 py-4 pb-4 flex flex-col min-h-0 [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
+      {/* Main Area: chat-scroll with zoom and scroll like ChatGPT */}
+      <div ref={homeScrollRef} className="chat-scroll flex-1 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth px-4 py-4 pb-4 flex flex-col min-h-0">
         {compareMode ? (
           /* Compare Grid mode */
           <CompareGrid currentPrompt={comparePrompt} responses={compareResponses} />
         ) : messages.length === 0 ? (
-          /* Clean Empty State - No example cards, no suggestion chips */
+          /* Clean Empty State - No example chats */
           <div className="m-auto flex flex-col items-center justify-center text-center p-6 max-w-lg">
             <div className="w-16 h-16 rounded-full bg-[#2f2f2f] border border-white/10 flex items-center justify-center mb-5 shadow-lg">
               <span className="text-2xl font-bold text-white">G</span>
@@ -193,108 +196,111 @@ export default function HomeView({
             </p>
           </div>
         ) : (
-          /* Normal Chat Messages Stream */
+          /* Normal Chat Messages Stream: ChatGPT style user right, AI left */
           <div className="max-w-3xl w-full mx-auto space-y-6 pb-6">
             {messages.map(msg => (
               <div
                 key={msg.id}
-                className={`group relative flex gap-3.5 ${
+                className={`group w-full flex ${
                   msg.sender === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
-                {msg.sender === 'assistant' && (
-                  <div className="w-8 h-8 rounded-full bg-[#2f2f2f] border border-white/10 flex items-center justify-center flex-shrink-0 mt-0.5 text-sky-400">
-                    <Bot className="w-4 h-4" />
-                  </div>
-                )}
+                {msg.sender === 'user' ? (
+                  /* USER MESSAGE: Right side like ChatGPT */
+                  <div className="w-full flex justify-end items-start gap-2.5">
+                    <div className="max-w-[70%] ml-auto flex flex-col items-end">
+                      {/* User bubble */}
+                      <div className="bg-[#2f2f2f] text-white rounded-2xl rounded-br-xs px-4 py-2.5 text-left border border-white/10 shadow-sm w-fit space-y-2">
+                        {/* Attachment chips if any */}
+                        {msg.attachments && msg.attachments.length > 0 && (
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {msg.attachments.map(att => (
+                              <div
+                                key={att.id}
+                                className="rounded-lg bg-black/40 border border-white/10 p-1.5 flex items-center gap-2 text-xs"
+                              >
+                                {att.type === 'image' && att.url ? (
+                                  <img
+                                    src={att.url}
+                                    alt={att.name}
+                                    className="w-12 h-12 rounded object-cover"
+                                  />
+                                ) : (
+                                  <span className="text-sky-400 font-mono text-[10px]">FILE</span>
+                                )}
+                                <span className="text-zinc-300 truncate max-w-[120px]">{att.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
 
-                <div
-                  className={`max-w-[85%] rounded-2xl p-4.5 space-y-2 text-sm leading-relaxed ${
-                    msg.sender === 'user'
-                      ? 'bg-[#2f2f2f] text-white border border-white/10'
-                      : 'bg-[#282828] text-zinc-100 border border-white/10 shadow-md'
-                  }`}
-                >
-                  {/* Sender & timestamp */}
-                  <div className="flex items-center justify-between text-xs text-zinc-400 pb-1 border-b border-white/5">
-                    <span className="font-semibold text-zinc-300">
-                      {msg.sender === 'user' ? 'You' : 'Gromina'}
-                    </span>
-                    <span className="text-[11px]">{msg.timestamp}</span>
-                  </div>
-
-                  {/* Attachment chips if any */}
-                  {msg.attachments && msg.attachments.length > 0 && (
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {msg.attachments.map(att => (
-                        <div
-                          key={att.id}
-                          className="rounded-lg bg-black/40 border border-white/10 p-1.5 flex items-center gap-2 text-xs"
-                        >
-                          {att.type === 'image' && att.url ? (
-                            <img
-                              src={att.url}
-                              alt={att.name}
-                              className="w-12 h-12 rounded object-cover"
+                        {/* User message or inline editor */}
+                        {editingMsgId === msg.id ? (
+                          <div className="mt-1 space-y-2 min-w-[220px]">
+                            <textarea
+                              value={editText}
+                              onChange={e => setEditText(e.target.value)}
+                              className="w-full bg-[#1e1e1e] border border-white/20 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-white/40 resize-none min-h-[70px] leading-relaxed [touch-action:manipulation]"
+                              rows={2}
+                              autoFocus
                             />
-                          ) : (
-                            <span className="text-sky-400 font-mono text-[10px]">FILE</span>
-                          )}
-                          <span className="text-zinc-300 truncate max-w-[120px]">{att.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Message content or inline editor */}
-                  {msg.sender === 'user' && editingMsgId === msg.id ? (
-                    <div className="mt-2 space-y-2">
-                      <textarea
-                        value={editText}
-                        onChange={e => setEditText(e.target.value)}
-                        className="w-full bg-[#1e1e1e] border border-white/20 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-white/40 resize-none min-h-[70px] leading-relaxed"
-                        rows={2}
-                        autoFocus
-                      />
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={handleCancelEdit}
-                          className="px-3 py-1 text-xs text-zinc-300 hover:text-white rounded-full border border-white/10 hover:bg-white/10 transition cursor-pointer"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleSaveEdit(msg.id)}
-                          className="px-3.5 py-1 text-xs font-semibold text-black bg-white hover:bg-zinc-200 rounded-full transition cursor-pointer shadow-xs"
-                        >
-                          Save
-                        </button>
+                            <div className="flex justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={handleCancelEdit}
+                                className="px-3 py-1 text-xs text-zinc-300 hover:text-white rounded-full border border-white/10 hover:bg-white/10 transition cursor-pointer"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleSaveEdit(msg.id)}
+                                className="px-3.5 py-1 text-xs font-semibold text-black bg-white hover:bg-zinc-200 rounded-full transition cursor-pointer shadow-xs"
+                              >
+                                Save
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.text}</p>
+                        )}
                       </div>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="whitespace-pre-wrap">{msg.text}</p>
-                      {msg.sender === 'user' ? (
+
+                      {/* Below user bubble: action row Copy Edit Retry right aligned */}
+                      {editingMsgId !== msg.id && (
                         <UserMessageActions
                           text={msg.text}
                           onEdit={() => handleStartEdit(msg)}
                           onRetry={() => handleRetryUserPrompt(msg.text)}
                         />
-                      ) : (
-                        <AiMessageActions
-                          text={msg.text}
-                          onRetry={() => handleRetryAiResponse(msg.id)}
-                        />
                       )}
-                    </>
-                  )}
-                </div>
+                    </div>
 
-                {msg.sender === 'user' && (
-                  <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5 text-white">
-                    <User className="w-4 h-4" />
+                    {/* Small User avatar on right */}
+                    <div className="w-7 h-7 rounded-full bg-zinc-700 text-white flex items-center justify-center flex-shrink-0 mt-0.5 text-xs">
+                      <User className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                ) : (
+                  /* AI MESSAGE: Left side like ChatGPT */
+                  <div className="w-full flex justify-start items-start gap-2.5">
+                    {/* Small AI avatar on left */}
+                    <div className="w-7 h-7 rounded-full bg-[#2f2f2f] border border-white/10 flex items-center justify-center flex-shrink-0 mt-0.5 text-sky-400">
+                      <Bot className="w-3.5 h-3.5" />
+                    </div>
+
+                    <div className="max-w-[80%] mr-auto flex flex-col items-start">
+                      {/* AI bubble */}
+                      <div className="bg-[#212121] text-white rounded-2xl rounded-bl-xs px-4 py-2.5 text-left border border-white/10 shadow-sm w-full space-y-2">
+                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-100">{msg.text}</p>
+                      </div>
+
+                      {/* Below AI bubble: action row Copy Sound Retry Download left aligned */}
+                      <AiMessageActions
+                        text={msg.text}
+                        onRetry={() => handleRetryAiResponse(msg.id)}
+                      />
+                    </div>
                   </div>
                 )}
               </div>

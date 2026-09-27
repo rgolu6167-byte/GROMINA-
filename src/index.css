@@ -2,10 +2,13 @@
 
 @layer base {
   html {
-    height: 100%;
-    overflow-x: auto;
+    height: auto;
+    min-height: 100dvh;
     overflow-y: auto;
+    overflow-x: auto;
     touch-action: pan-x pan-y pinch-zoom;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: auto;
     -webkit-text-size-adjust: 100%;
     background-color: #212121;
     color: #f4f4f5;
@@ -16,11 +19,13 @@
   }
 
   body {
-    min-height: 100%;
-    overflow-x: auto;
+    height: auto;
+    min-height: 100dvh;
     overflow-y: auto;
+    overflow-x: auto;
     touch-action: pan-x pan-y pinch-zoom;
-    overscroll-behavior-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: auto;
     background-color: #212121;
     color: #f4f4f5;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -30,10 +35,13 @@
   }
 
   #root {
+    height: auto;
     min-height: 100dvh;
-    overflow-x: auto;
     overflow-y: auto;
+    overflow-x: auto;
     touch-action: pan-x pan-y pinch-zoom;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: auto;
     width: 100%;
   }
 
@@ -50,11 +58,13 @@
 }
 
 .chat-scroll {
-  overflow-x: auto;
+  flex: 1 1 0%;
   overflow-y: auto;
+  overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-x pan-y pinch-zoom;
-  overscroll-behavior: contain;
+  overscroll-behavior: auto;
+  scroll-behavior: smooth;
 }
 
 /* Custom scrollbars for dark theme */

@@ -126,7 +126,7 @@ export default function WebsiteView() {
         </div>
 
         {/* Right panel flex-1 bg #0a0a0a flex flex-col */}
-        <div className="flex-1 bg-[#0a0a0a] flex flex-col overflow-hidden">
+        <div className="flex-1 bg-[#0a0a0a] flex flex-col overflow-y-auto overflow-x-auto">
           {/* Toolbar h-12 bg #171717 border-b white/10 flex justify-between px-4 */}
           <div className="h-12 bg-[#171717] border-b border-white/10 flex justify-between items-center px-4 flex-shrink-0">
             {/* Left pill with Preview and Code */}

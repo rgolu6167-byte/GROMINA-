@@ -54,6 +54,7 @@ export default function BusinessView({
   ]);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const businessScrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -172,7 +173,7 @@ export default function BusinessView({
   // State 1: Not Created (New User setup screen)
   if (!isCreated) {
     return (
-      <div className="flex-1 overflow-y-auto min-h-0 bg-[#212121] p-6 flex flex-col justify-center [touch-action:pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
+      <div ref={businessScrollRef} className="flex-1 overflow-y-auto overflow-x-auto min-h-0 bg-[#212121] p-6 flex flex-col justify-center [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth">
         <div className="w-full max-w-[560px] mx-auto mt-4 mb-8">
           {/* Header */}
           <div className="text-center mb-6">
@@ -251,7 +252,7 @@ export default function BusinessView({
   // State 2: Created (Testing & Channel integrations)
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[#212121] relative [touch-action:pan-x_pan-y_pinch-zoom]">
-      <div className="flex-1 overflow-y-auto px-4 py-6 pb-4 min-h-0 [touch-action:pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
+      <div className="flex-1 overflow-y-auto overflow-x-auto px-4 py-6 pb-4 min-h-0 [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth">
         <div className="max-w-3xl mx-auto space-y-8 pb-10">
           {/* Summary Card */}
           <div className="bg-[#2f2f2f] border border-white/10 rounded-2xl p-5 shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -283,7 +284,7 @@ export default function BusinessView({
             </div>
 
             {/* Chat List */}
-            <div className="bg-[#1b1b1b] border border-white/10 rounded-2xl p-4 min-h-[260px] max-h-[380px] chat-scroll overflow-x-auto overflow-y-auto space-y-4">
+            <div ref={businessScrollRef} className="bg-[#1b1b1b] border border-white/10 rounded-2xl p-4 min-h-[260px] max-h-[380px] chat-scroll flex-1 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth space-y-4">
               {messages.length === 0 ? (
                 <div className="h-44 flex flex-col items-center justify-center text-center text-zinc-500 text-xs">
                   <Bot className="w-8 h-8 text-zinc-600 mb-2" />

@@ -6,90 +6,90 @@ export function generateTeacherResponse(topicPrompt: string) {
 
   // Create structured steps based on topic
   let topicTitle = cleanPrompt;
-  let overview = `Dekho, **${cleanPrompt}** ek fundamental concept hai. Chalo isko step-by-step tod kar clear karte hain taaki tumhe hamesha ke liye samajh aa jaye.`;
+  let overview = `**${cleanPrompt}** is a fundamental concept. Let's break it down step-by-step so you understand it completely and permanently.`;
   
   let steps = [
     {
       step: 1,
       title: "Core Foundation & Context",
-      content: `Pehle basic samjho: Jab hum "${cleanPrompt}" ki baat karte hain, toh pehla sawal hota hai 'kyun aur kaise'. Har concept kisi practical problem ko solve karne ke liye banaya gaya hai. Iska main idea simple logic par based hai.`
+      content: `First understand the foundation: When we explore "${cleanPrompt}", the primary question is 'why and how'. Every concept is engineered to solve a practical real-world problem, grounded in simple, elegant logic.`
     },
     {
       step: 2,
       title: "Working Mechanism & Rules",
-      content: `Isme 2-3 important components hote hain jo continuous sync me kaam karte hain. Input milne par ye rules follow karta hai aur systematically expected output generate karta hai bina kisi side-effect ke.`
+      content: `It contains 2-3 essential components that work in continuous synchronization. Upon receiving input, it follows defined rules and systematically produces the expected output without unintended side-effects.`
     },
     {
       step: 3,
       title: "Real-World Analogy & Application",
-      content: `Isko real life se relate karo: Jaise traffic signal ya recipe me ingredients order me aate hain, waise hi yahan har stage sequentially execute hoti hai. Industry me 90% systems is logic pe depend karte hain.`
+      content: `Relate this to everyday life: Just like a traffic signal sequence or a recipe where ingredients follow strict order, every stage here executes sequentially. In industry, over 90% of architectures depend on this very logic.`
     }
   ];
 
-  let proTip = "Exam ya interview me iska seedha diagram ya formula pehle draw karna. Direct marks milte hain aur examiner ko clarity samajh aati hai!";
+  let proTip = "In exams or technical interviews, draw the direct architecture diagram or formula first. It earns immediate marks and proves conceptual clarity!";
 
   let checkQuestion = {
-    question: `Check your understanding: ${cleanPrompt} ke core working principle ke baare me kya sahi hai?`,
+    question: `Check your understanding: What is true about the core working principle of ${cleanPrompt}?`,
     options: [
-      "Ye random execute hota hai bina kisi rule ke",
-      "Ye step-by-step logic aur predefined rules follow karta hai",
-      "Ye sirf theoretical concept hai aur real life me use nahi hota",
-      "Iska koi defined output ya result nahi hota"
+      "It executes randomly without adhering to any rules",
+      "It follows structured step-by-step logic and predefined rules",
+      "It is merely theoretical and cannot be used in real life",
+      "It produces no predictable output or deterministic results"
     ],
     correctIndex: 1,
-    explanation: "Bilkul sahi! Har structured concept rules aur systematic stages par based hota hai."
+    explanation: "Exactly right! Every robust concept operates on systematic rules and deterministic stages."
   };
 
   if (lower.includes('gravity') || lower.includes('physics') || lower.includes('newton')) {
     topicTitle = "Newton's Gravitational Law & Physics";
-    overview = "Gravitation universe ka wo unseen force hai jo har do mass wale objects ko ek dusre ki taraf attract karta hai. Sir Isaac Newton ne isko mathematically prove kiya tha.";
+    overview = "Gravitation is the universal attractive force that pulls any two objects with mass toward each other, formulated mathematically by Sir Isaac Newton.";
     steps = [
       {
         step: 1,
         title: "The Force Equation (F = G * m1 * m2 / r²)",
-        content: "Force dono masses ke product ke directly proportional hota hai, aur unke beech ki distance ke square ke inversely proportional."
+        content: "The gravitational force is directly proportional to the product of their masses, and inversely proportional to the square of the distance between them."
       },
       {
         step: 2,
         title: "Inverse Square Rule",
-        content: "Agar distance double kar di jaye, toh gravitational attraction 4 guna kam (1/4th) ho jayegi. Ye rule satellites aur planets orbit maintain karne ke liye use hota hai."
+        content: "If the distance is doubled, the gravitational attraction decreases to one-fourth (1/4th). This rule governs planetary orbits and satellites."
       },
       {
         step: 3,
         title: "Weight vs Mass Difference",
-        content: "Mass hamesha constant rehta hai (e.g. 60kg on Earth and Moon), jabki Weight (W = mg) local gravity par depend karta hai (Moon pe weight 1/6th ho jata hai)."
+        content: "Mass is invariant (e.g. 60kg on Earth and Moon), whereas Weight (W = mg) varies with local gravitational field strength (1/6th on the Moon)."
       }
     ];
-    proTip = "Pro Tip: 'G' (Universal Constant = 6.67 x 10^-11 N m²/kg²) aur 'g' (acceleration due to gravity = 9.8 m/s²) me confuse mat hona!";
+    proTip = "Pro Tip: Never confuse 'G' (Universal Constant = 6.67 x 10^-11 N m²/kg²) with 'g' (local acceleration due to gravity ≈ 9.8 m/s²)!";
     checkQuestion = {
-      question: "Agar do objects ke beech ki doori 2 guna badha di jaye, toh gravitational force par kya asar padega?",
-      options: ["Force 2x badh jayega", "Force half (1/2) ho jayega", "Force 1/4th (one fourth) ho jayega", "Force par koi asar nahi hoga"],
+      question: "If the distance between two objects is doubled, what happens to the gravitational force between them?",
+      options: ["Force increases by 2x", "Force is halved (1/2)", "Force drops to 1/4th (one fourth)", "Force remains completely unchanged"],
       correctIndex: 2,
-      explanation: "Sahi jawab! F ∝ 1/r², toh r double hone par force (1/2)² = 1/4th ho jata hai."
+      explanation: "Correct! By the inverse-square law F ∝ 1/r², doubling the distance reduces the force to (1/2)² = 1/4th."
     };
   } else if (lower.includes('react') || lower.includes('hook') || lower.includes('javascript') || lower.includes('state')) {
     topicTitle = "React State & Component Lifecycle";
-    overview = "React me State wo memory box hai jo component ke re-render hone par bhi data ko preserve rakhta hai aur UI ko auto-update karta hai.";
+    overview = "In React, State is the component's internal memory that preserves values across re-renders and automatically synchronizes the DOM.";
     steps = [
       {
         step: 1,
         title: "useState Declaration",
-        content: "const [state, setState] = useState(initialValue). Pehla variable current value deta hai, dusra function update trigger karta hai."
+        content: "const [state, setState] = useState(initialValue). The first variable provides the current snapshot, while the updater function schedules re-renders."
       },
       {
         step: 2,
         title: "Immutability Rule",
-        content: "State ko direct mutate mat karo (`state = 5` galat hai). Hamesha setter function use karo (`setState(5)`) taaki React virtual DOM diffing run kar sake."
+        content: "Never mutate state directly (`state = 5` is incorrect). Always use the setter function (`setState(5)`) so React can run Virtual DOM diffing."
       },
       {
         step: 3,
         title: "Async Batching",
-        content: "React state updates ko batch karta hai better performance ke liye. Previous state par depend karne ke liye `setCount(prev => prev + 1)` functional updater use karo."
+        content: "React batches state updates for optimal performance. When computing next state from prior state, always use a functional updater: `setCount(prev => prev + 1)`."
       }
     ];
-    proTip = "Exam/Interview Trick: State updates async hoti hain! Turant baad `console.log(state)` karoge toh purani value dikhegi. Use useEffect to track latest updates.";
+    proTip = "Interview Pro Tip: State updates are asynchronous! Logging immediately after calling `setState` yields the old snapshot. Use useEffect to observe updated values.";
     checkQuestion = {
-      question: "React me array state me new item add karne ka correct immutable tareeka kya hai?",
+      question: "What is the correct immutable pattern to append an item to an array in React state?",
       options: [
         "items.push(newItem); setItems(items);",
         "setItems([...items, newItem]);",
@@ -97,7 +97,7 @@ export function generateTeacherResponse(topicPrompt: string) {
         "setItems(items.concat([newItem])); items.reverse();"
       ],
       correctIndex: 1,
-      explanation: "Shabash! Spread operator `[...items, newItem]` ek new array reference banata hai jo React ko re-render trigger karne me help karta hai."
+      explanation: "Well done! The spread operator `[...items, newItem]` creates a fresh array reference that triggers React's reconciliation."
     };
   }
 
@@ -112,27 +112,27 @@ export function generateTeacherResponse(topicPrompt: string) {
 
 export function generateBusinessResponse(customerQuery: string, config: BusinessConfig): string {
   const query = customerQuery.toLowerCase();
-  const bName = config.name || "Hamara Business";
+  const bName = config.name || "Our Business";
   const bCat = config.category || "General Services";
-  const bDesc = config.description || "Hamari team best customer support aur high quality products provide karti hai.";
+  const bDesc = config.description || "Our team provides top-tier customer support and high quality products.";
 
-  if (query.includes('price') || query.includes('cost') || query.includes('rate') || query.includes('kitna')) {
-    return `Namaste! ${bName} (${bCat}) me aapka swagat hai. Hamare packages competitive aur transparent hain. Hamare basic plans standard market rates par available hain aur custom requirements ke according tailored quotes provide kiye jaate hain. Kya aap batana chahenge ki aap kis specific service ya product me interested hain?`;
+  if (query.includes('price') || query.includes('cost') || query.includes('rate') || query.includes('pricing')) {
+    return `Hello! Welcome to ${bName} (${bCat}). Our pricing is transparent and highly competitive. Standard plans are available at competitive rates, and we also provide tailored quotes for custom needs. Which specific product or service are you interested in?`;
   }
 
-  if (query.includes('time') || query.includes('hour') || query.includes('kab') || query.includes('open')) {
-    return `Hello! ${bName} customer support 24/7 active hai AI Employee ke through. Hamari operational delivery timing Monday se Saturday 9:00 AM se 8:00 PM tak rehti hai. Aap kabhi bhi order ya enquiry place kar sakte hain!`;
+  if (query.includes('time') || query.includes('hour') || query.includes('open') || query.includes('when') || query.includes('schedule')) {
+    return `Hello! ${bName} customer support is active 24/7 via our AI Employee. Our standard delivery and operations run Monday through Saturday, 9:00 AM to 8:00 PM. Feel free to place your inquiry or order anytime!`;
   }
 
   if (query.includes('return') || query.includes('refund') || query.includes('cancel')) {
-    return `Ji bilkul, ${bName} me customer satisfaction hamari priority hai. Hamare yahan 7-day hassle-free return aur refund policy valid hai agar item undamaged ho. Aap order ID provide kijiye, hum turant process kar denge.`;
+    return `Customer satisfaction is our top priority at ${bName}. We provide a hassle-free 7-day return and refund policy on undamaged items. Please provide your order ID, and we will process it right away.`;
   }
 
-  if (query.includes('location') || query.includes('address') || query.includes('kahan')) {
-    return `Dhanyawad aapke sawal ke liye! ${bName} primarily online operate karta hai nationwide delivery aur prompt service ke saath. Hamara digital headquarters support desk hamesha connected hai WhatsApp aur web par.`;
+  if (query.includes('location') || query.includes('address') || query.includes('where') || query.includes('contact')) {
+    return `Thank you for asking! ${bName} operates primarily online with nationwide delivery and prompt service. Our digital support desk is always accessible via web and chat.`;
   }
 
-  return `Namaste! Main ${bName} ka AI Business Employee hoon. ${bDesc} Ke baare me aap jo bhi janna chahte hain—jaise products, bookings, delivery ya pricing—main yahan aapki poori madad karne ke liye tayyar hoon. Aap bataiye main aapki kya seva kar sakta hoon?`;
+  return `Hello! I am the AI Business Employee for ${bName}. Regarding ${bDesc}, whatever you'd like to know—such as products, bookings, delivery, or pricing—I am here to assist you fully. How can I help you today?`;
 }
 
 export function generateWebsiteContent(prompt: string) {

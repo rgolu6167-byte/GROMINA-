@@ -3,7 +3,7 @@ import {
   Plus,
   Mic,
   MicOff,
-  Radio,
+  AudioLines,
   ArrowUp,
   FileText,
   Image as ImageIcon,
@@ -37,6 +37,10 @@ export default function BottomInputBar({
   const photoInputRef = useRef<HTMLInputElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const recognitionRef = useRef<any>(null);
+
+  // Dynamic typing state like ChatGPT
+  const isTyping = text.trim().length > 0;
+  const canSend = (text.trim().length > 0 || attachments.length > 0) && !disabled;
 
   // Close plus menu when clicking outside
   useEffect(() => {
@@ -161,6 +165,7 @@ export default function BottomInputBar({
     if (!text.trim() && attachments.length === 0) return;
 
     onSendMessage(text.trim(), attachments);
+    // After message send, clear input, set isTyping false, show all mic voice send again
     setText('');
     setAttachments([]);
     if (textareaRef.current) {
@@ -174,8 +179,6 @@ export default function BottomInputBar({
       handleSend();
     }
   };
-
-  const hasContent = text.trim().length > 0 || attachments.length > 0;
 
   return (
     <div
@@ -199,7 +202,7 @@ export default function BottomInputBar({
               <button
                 type="button"
                 onClick={() => removeAttachment(att.id)}
-                className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-white/10 text-zinc-400 hover:text-white transition"
+                className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-white/10 text-zinc-400 hover:text-white transition cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -210,12 +213,12 @@ export default function BottomInputBar({
 
       {/* Inner Input Box */}
       <div className="max-w-3xl mx-auto bg-[#2f2f2f] border border-white/10 rounded-2xl px-3 py-2.5 flex items-end gap-2 w-full shadow-lg relative">
-        {/* Left: Plus button with popup menu */}
+        {/* Left: Plus button with popup menu - always visible */}
         <div className="relative flex-shrink-0" ref={menuRef}>
           <button
             type="button"
             onClick={() => setIsMenuOpen(prev => !prev)}
-            className="w-[36px] h-[36px] rounded-full hover:bg-white/10 flex items-center justify-center text-zinc-300 hover:text-white transition"
+            className="w-[36px] h-[36px] rounded-full hover:bg-white/10 flex items-center justify-center text-zinc-300 hover:text-white transition cursor-pointer"
             title="Attach file or photo"
           >
             <Plus className={`w-5 h-5 transition-transform duration-200 ${isMenuOpen ? 'rotate-45' : ''}`} />
@@ -227,7 +230,7 @@ export default function BottomInputBar({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition"
+                className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition cursor-pointer"
               >
                 <FileText className="w-4 h-4 text-sky-400" />
                 <span>Upload file</span>
@@ -235,7 +238,7 @@ export default function BottomInputBar({
               <button
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
-                className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition"
+                className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition cursor-pointer"
               >
                 <ImageIcon className="w-4 h-4 text-emerald-400" />
                 <span>Upload photo</span>
@@ -246,7 +249,7 @@ export default function BottomInputBar({
                   setIsMenuOpen(false);
                   onOpenCamModal();
                 }}
-                className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition"
+                className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm text-zinc-200 hover:text-white hover:bg-white/10 rounded-xl transition cursor-pointer"
               >
                 <Camera className="w-4 h-4 text-amber-400" />
                 <span>Take photo</span>
@@ -280,50 +283,66 @@ export default function BottomInputBar({
             placeholder={placeholder}
             rows={1}
             disabled={disabled}
-            className="w-full min-h-[24px] max-h-[120px] overflow-y-auto bg-transparent border-0 outline-none resize-none text-white text-sm placeholder:text-zinc-500 leading-6 px-1 scrollbar-none"
+            className="w-full min-h-[24px] max-h-[120px] overflow-y-auto bg-transparent border-0 outline-none resize-none text-white text-sm placeholder:text-zinc-500 leading-6 px-1 scrollbar-none [touch-action:manipulation]"
           />
         </div>
 
-        {/* Right cluster */}
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          {/* Mic button */}
-          <button
-            type="button"
-            onClick={toggleListening}
-            className={`w-[36px] h-[36px] rounded-full flex items-center justify-center transition ${
-              isListening
-                ? 'bg-red-500/20 text-red-400 ring-2 ring-red-500/50 animate-pulse'
-                : 'hover:bg-white/10 text-zinc-300 hover:text-white'
-            }`}
-            title={isListening ? 'Listening... click to stop' : 'Use voice input'}
-          >
-            {isListening ? <MicOff className="w-4 h-4 text-red-400" /> : <Mic className="w-4 h-4" />}
-          </button>
+        {/* Right side dynamic action area: ChatGPT style */}
+        <div className="flex items-center flex-shrink-0 transition-all duration-200 ease-in-out">
+          {isTyping ? (
+            /* When isTyping true: hide mic & voice buttons, show ONLY send button */
+            <button
+              type="button"
+              onClick={handleSend}
+              disabled={disabled}
+              className="w-[34px] h-[34px] rounded-full bg-white text-black hover:bg-zinc-200 flex items-center justify-center transition-all duration-150 cursor-pointer shadow-md active:scale-95 flex-shrink-0"
+              title="Send message"
+            >
+              <ArrowUp className="w-4 h-4 text-black stroke-[2.5]" />
+            </button>
+          ) : (
+            /* When isTyping false (empty): show 3 icons on right: mic, voice, send. Gap 8px (gap-2) */
+            <div className="flex items-center gap-2 transition-all duration-200">
+              {/* Mic button */}
+              <button
+                type="button"
+                onClick={toggleListening}
+                className={`w-[34px] h-[34px] rounded-full flex items-center justify-center transition cursor-pointer ${
+                  isListening
+                    ? 'bg-red-500/20 text-red-400 ring-2 ring-red-500/50 animate-pulse'
+                    : 'hover:bg-white/10 text-zinc-300 hover:text-white'
+                }`}
+                title={isListening ? 'Listening... click to stop' : 'Use voice input'}
+              >
+                {isListening ? <MicOff className="w-4 h-4 text-red-400" /> : <Mic className="w-4 h-4" />}
+              </button>
 
-          {/* Voice wave button */}
-          <button
-            type="button"
-            onClick={onOpenVoiceOverlay}
-            className="w-[36px] h-[36px] rounded-full hover:bg-white/10 flex items-center justify-center text-zinc-300 hover:text-white transition"
-            title="Open Voice Assistant Mode"
-          >
-            <Radio className="w-4 h-4 text-sky-400" />
-          </button>
+              {/* Voice button icon AudioLines */}
+              <button
+                type="button"
+                onClick={onOpenVoiceOverlay}
+                className="w-[34px] h-[34px] rounded-full hover:bg-white/10 flex items-center justify-center text-zinc-300 hover:text-white transition cursor-pointer"
+                title="Voice mode"
+              >
+                <AudioLines className="w-4 h-4 text-sky-400" />
+              </button>
 
-          {/* Send button */}
-          <button
-            type="button"
-            onClick={handleSend}
-            disabled={!hasContent || disabled}
-            className={`w-[32px] h-[32px] rounded-full flex items-center justify-center transition-all duration-200 ${
-              hasContent && !disabled
-                ? 'bg-white text-black hover:bg-zinc-200 cursor-pointer shadow-sm active:scale-95'
-                : 'bg-[#565656] text-white/50 cursor-not-allowed'
-            }`}
-            title="Send message"
-          >
-            <ArrowUp className="w-4 h-4" />
-          </button>
+              {/* Send button icon ArrowUp in circle bg white text black */}
+              <button
+                type="button"
+                onClick={handleSend}
+                disabled={!canSend}
+                className={`w-[34px] h-[34px] rounded-full flex items-center justify-center transition-all duration-150 ${
+                  canSend
+                    ? 'bg-white text-black hover:bg-zinc-200 cursor-pointer shadow-sm active:scale-95'
+                    : 'bg-white text-black opacity-35 cursor-not-allowed'
+                }`}
+                title="Send message"
+              >
+                <ArrowUp className="w-4 h-4 stroke-[2.5]" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
