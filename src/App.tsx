@@ -37,7 +37,7 @@ export default function App() {
   const [businessMessages, setBusinessMessages] = useState<ChatMessage[]>([]);
   const [codexMessages, setCodexMessages] = useState<ChatMessage[]>([]);
 
-  // AI Fiesta Compare Mode state (available in Gromina main and My Teacher only)
+  // Compare Mode state (available in Gromina main and My Teacher only)
   const [compareMode, setCompareMode] = useState(false);
   const [comparePrompt, setComparePrompt] = useState<string | null>(null);
   const [compareResponses, setCompareResponses] = useState<Record<string, string> | null>(null);
@@ -191,7 +191,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-auto min-h-screen w-full overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] bg-[#212121] text-zinc-100 font-sans select-text">
+    <div className="flex flex-col md:flex-row h-screen min-h-screen w-full bg-[#212121] overflow-hidden text-zinc-100 font-sans select-text">
       {/* Sidebar 280px desktop, drawer on mobile */}
       <Sidebar
         currentView={currentView}
@@ -214,7 +214,7 @@ export default function App() {
       />
 
       {/* Main View Area */}
-      <main className="flex-1 flex flex-col min-w-0 h-auto min-h-0 bg-[#212121] overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth">
+      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative bg-[#212121]">
         {/* Mobile Header Bar */}
         <div className="md:hidden h-12 bg-[#171717] border-b border-white/10 flex items-center justify-between px-4 flex-shrink-0 z-30">
           <button

@@ -176,17 +176,17 @@ export default function HomeView({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-[#212121] relative [touch-action:pan-x_pan-y_pinch-zoom]">
+    <div className="flex-1 flex flex-col h-full min-h-0 bg-[#212121] relative [touch-action:pan-x_pan-y_pinch-zoom]">
       {/* Top bar with Compare button */}
       <header className="h-14 bg-[#171717] border-b border-white/10 flex justify-between items-center px-4 flex-shrink-0 z-10">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-bold text-white text-xs">
+          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-bold text-white text-xs shadow-xs">
             G
           </div>
           <span className="font-bold text-white text-sm tracking-tight">Gromina</span>
         </div>
 
-        {/* Right side: Compare button AI Fiesta style */}
+        {/* Right side: Compare button */}
         <button
           onClick={handleToggle}
           disabled={!compareEnabled}
@@ -222,7 +222,7 @@ export default function HomeView({
           </div>
         ) : (
           /* Normal Chat Messages Stream: ChatGPT style user right, AI left */
-          <div className="max-w-3xl w-full mx-auto space-y-6 pb-6">
+          <div className="max-w-3xl w-full mx-auto space-y-4 pb-6">
             {messages.map(msg => (
               <div
                 key={msg.id}
@@ -235,26 +235,31 @@ export default function HomeView({
                   /* USER MESSAGE: Right side like ChatGPT */
                   <div className="w-full flex justify-end items-start gap-2.5">
                     <div className="flex flex-col items-end max-w-[70%] md:max-w-[60%]">
-                      {/* User bubble */}
-                      <div className="w-fit max-w-[70%] md:max-w-[60%] bg-[#2f2f2f] text-white rounded-2xl rounded-br-sm px-4 py-3 text-[14.5px] leading-6 whitespace-pre-wrap break-words border border-white/10 shadow-sm space-y-2">
+                      {/* Timestamp above bubble right aligned */}
+                      <span className="text-[11px] text-zinc-500 mb-1 pr-1 font-normal select-none">
+                        You {msg.timestamp}
+                      </span>
+
+                      {/* User bubble: thin patla like ChatGPT */}
+                      <div className="w-fit max-w-[70%] md:max-w-[60%] bg-[#2f2f2f] text-white rounded-2xl rounded-br-sm px-3 py-2 text-sm leading-5 font-normal break-words border border-white/10 shadow-xs space-y-1.5">
                         {/* Attachment chips if any */}
                         {msg.attachments && msg.attachments.length > 0 && (
-                          <div className="flex flex-wrap gap-2 pt-1">
+                          <div className="flex flex-wrap gap-1.5 pt-0.5">
                             {msg.attachments.map(att => (
                               <div
                                 key={att.id}
-                                className="rounded-lg bg-black/40 border border-white/10 p-1.5 flex items-center gap-2 text-xs"
+                                className="rounded-lg bg-black/40 border border-white/10 p-1 flex items-center gap-1.5 text-xs"
                               >
                                 {att.type === 'image' && att.url ? (
                                   <img
                                     src={att.url}
                                     alt={att.name}
-                                    className="w-12 h-12 rounded object-cover"
+                                    className="w-10 h-10 rounded object-cover"
                                   />
                                 ) : (
                                   <span className="text-sky-400 font-mono text-[10px]">FILE</span>
                                 )}
-                                <span className="text-zinc-300 truncate max-w-[120px]">{att.name}</span>
+                                <span className="text-zinc-300 truncate max-w-[120px] text-[11px]">{att.name}</span>
                               </div>
                             ))}
                           </div>
@@ -266,7 +271,7 @@ export default function HomeView({
                             <textarea
                               value={editText}
                               onChange={e => setEditText(e.target.value)}
-                              className="w-full bg-[#1e1e1e] border border-white/20 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-white/40 resize-none min-h-[70px] leading-relaxed [touch-action:manipulation]"
+                              className="w-full bg-[#1e1e1e] border border-white/20 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-white/40 resize-none min-h-[60px] leading-relaxed [touch-action:manipulation]"
                               rows={2}
                               autoFocus
                             />
@@ -274,14 +279,14 @@ export default function HomeView({
                               <button
                                 type="button"
                                 onClick={handleCancelEdit}
-                                className="px-3 py-1 text-xs text-zinc-300 hover:text-white rounded-full border border-white/10 hover:bg-white/10 transition cursor-pointer"
+                                className="px-2.5 py-1 text-xs text-zinc-300 hover:text-white rounded-full border border-white/10 hover:bg-white/10 transition cursor-pointer"
                               >
                                 Cancel
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleSaveEdit(msg.id)}
-                                className="px-3.5 py-1 text-xs font-semibold text-black bg-white hover:bg-zinc-200 rounded-full transition cursor-pointer shadow-xs"
+                                className="px-3 py-1 text-xs font-semibold text-black bg-white hover:bg-zinc-200 rounded-full transition cursor-pointer shadow-xs"
                               >
                                 Save
                               </button>
@@ -309,16 +314,21 @@ export default function HomeView({
                   </div>
                 ) : (
                   /* AI MESSAGE: Left side like ChatGPT */
-                  <div className="w-full flex justify-start items-start gap-3">
-                    {/* Small AI avatar on left */}
-                    <div className="w-7 h-7 rounded-full bg-[#2f2f2f] border border-white/10 flex items-center justify-center flex-shrink-0 mt-0.5 text-sky-400">
-                      <Bot className="w-3.5 h-3.5" />
+                  <div className="w-full flex justify-start items-start gap-2.5">
+                    {/* G logo avatar on left */}
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-bold text-white text-xs flex-shrink-0 mt-0.5 shadow-xs">
+                      G
                     </div>
 
-                    <div className="flex flex-col items-start max-w-[80%] md:max-w-[75%]">
+                    <div className="flex flex-col items-start max-w-[82%] md:max-w-[75%]">
+                      {/* Timestamp above bubble left aligned */}
+                      <span className="text-[11px] text-zinc-500 mb-1 pl-1 font-normal select-none">
+                        Gromina {msg.timestamp}
+                      </span>
+
                       {/* AI bubble */}
-                      <div className="w-fit max-w-[80%] md:max-w-[75%] bg-[#2f2f2f]/60 border border-white/5 rounded-2xl rounded-bl-sm px-4 py-3 text-[14.5px] leading-6 whitespace-pre-wrap break-words text-left text-white shadow-sm space-y-2">
-                        <p className="whitespace-pre-wrap text-zinc-100">{msg.text}</p>
+                      <div className="w-fit max-w-[82%] md:max-w-[75%] bg-[#2f2f2f]/60 border border-white/5 rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm leading-6 whitespace-pre-wrap break-words text-left text-zinc-100 shadow-xs space-y-2">
+                        <p className="whitespace-pre-wrap">{msg.text}</p>
                       </div>
 
                       {/* Below AI bubble: action row Copy Sound Retry Download left aligned */}

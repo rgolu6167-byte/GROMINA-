@@ -182,11 +182,11 @@ export default function BottomInputBar({
 
   return (
     <div
-      className="flex-shrink-0 w-full bg-[#212121] p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sticky bottom-0 z-10 [touch-action:manipulation]"
+      className="max-w-3xl mx-auto p-3 sticky bottom-0 bg-[#212121] z-20 w-full shrink-0 [touch-action:manipulation]"
     >
       {/* File chips above bar */}
       {attachments.length > 0 && (
-        <div className="max-w-3xl mx-auto flex flex-wrap gap-2 mb-2 px-1">
+        <div className="flex flex-wrap gap-2 mb-2 px-1">
           {attachments.map(att => (
             <div
               key={att.id}
@@ -212,7 +212,7 @@ export default function BottomInputBar({
       )}
 
       {/* Inner Input Box */}
-      <div className="max-w-3xl mx-auto bg-[#2f2f2f] border border-white/10 rounded-2xl px-3 py-2.5 flex items-end gap-2 w-full shadow-lg relative">
+      <div className="bg-[#2f2f2f] border border-white/10 rounded-2xl px-3 py-2 flex items-end gap-2 w-full shadow-lg relative">
         {/* Left: Plus button with popup menu - always visible */}
         <div className="relative flex-shrink-0" ref={menuRef}>
           <button

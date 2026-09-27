@@ -98,7 +98,6 @@ export default function CompareGrid({ currentPrompt, responses }: CompareGridPro
                   <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: model.color }} />
                   Completed
                 </span>
-                <span className="font-mono text-[10px] text-zinc-500">AI Fiesta Mode</span>
               </div>
             </div>
           );

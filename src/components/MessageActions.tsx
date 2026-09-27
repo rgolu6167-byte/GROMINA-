@@ -39,22 +39,22 @@ export function UserMessageActions({ text, onEdit, onRetry }: UserMessageActions
   };
 
   return (
-    <div className="flex items-center justify-end gap-2 mt-2 opacity-80 md:opacity-0 md:group-hover:opacity-100 transition-opacity select-none">
+    <div className="flex items-center justify-end gap-1.5 mt-1.5 select-none">
       {/* Copy button */}
       <button
         type="button"
         onClick={handleCopy}
-        className="bg-transparent border border-white/10 rounded-full px-2.5 py-1 text-xs text-zinc-400 hover:text-white hover:bg-[#2f2f2f] transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
-        title={copied ? 'Copied to clipboard' : 'Copy'}
+        className="px-2 py-1 rounded-full bg-[#2f2f2f] border border-white/10 text-xs text-zinc-400 hover:text-white hover:bg-[#3a3a3a] transition flex items-center gap-1 cursor-pointer shadow-xs active:scale-95"
+        title={copied ? 'Copied' : 'Copy'}
       >
         {copied ? (
           <>
-            <Check className="w-3.5 h-3.5 text-emerald-400" />
+            <Check className="w-3 h-3 text-emerald-400" />
             <span className="text-[11px] text-emerald-400 font-medium">Copied</span>
           </>
         ) : (
           <>
-            <Copy className="w-3.5 h-3.5" />
+            <Copy className="w-3 h-3" />
             <span className="text-[11px]">Copy</span>
           </>
         )}
@@ -64,10 +64,10 @@ export function UserMessageActions({ text, onEdit, onRetry }: UserMessageActions
       <button
         type="button"
         onClick={onEdit}
-        className="bg-transparent border border-white/10 rounded-full px-2.5 py-1 text-xs text-zinc-400 hover:text-white hover:bg-[#2f2f2f] transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+        className="px-2 py-1 rounded-full bg-[#2f2f2f] border border-white/10 text-xs text-zinc-400 hover:text-white hover:bg-[#3a3a3a] transition flex items-center gap-1 cursor-pointer shadow-xs active:scale-95"
         title="Edit message"
       >
-        <Pencil className="w-3.5 h-3.5" />
+        <Pencil className="w-3 h-3" />
         <span className="text-[11px]">Edit</span>
       </button>
 
@@ -75,10 +75,10 @@ export function UserMessageActions({ text, onEdit, onRetry }: UserMessageActions
       <button
         type="button"
         onClick={onRetry}
-        className="bg-transparent border border-white/10 rounded-full px-2.5 py-1 text-xs text-zinc-400 hover:text-white hover:bg-[#2f2f2f] transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+        className="px-2 py-1 rounded-full bg-[#2f2f2f] border border-white/10 text-xs text-zinc-400 hover:text-white hover:bg-[#3a3a3a] transition flex items-center gap-1 cursor-pointer shadow-xs active:scale-95"
         title="Retry prompt"
       >
-        <RefreshCw className="w-3.5 h-3.5" />
+        <RefreshCw className="w-3 h-3" />
         <span className="text-[11px]">Retry</span>
       </button>
     </div>
@@ -182,24 +182,18 @@ export function AiMessageActions({ text, onRetry }: AiMessageActionsProps) {
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-start gap-2 mt-3 opacity-80 md:opacity-0 md:group-hover:opacity-100 transition-opacity select-none">
+    <div className="flex items-center justify-start gap-1.5 mt-2 flex-wrap select-none">
       {/* Copy button */}
       <button
         type="button"
         onClick={handleCopy}
-        className="bg-transparent border border-white/10 rounded-full px-2.5 py-1 text-xs text-zinc-400 hover:text-white hover:bg-[#2f2f2f] transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+        className="w-7 h-7 rounded-full bg-[#2f2f2f] border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 flex items-center justify-center transition cursor-pointer shadow-xs active:scale-95"
         title={copied ? 'Copied' : 'Copy answer'}
       >
         {copied ? (
-          <>
-            <Check className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="text-[11px] text-emerald-400 font-medium">Copied</span>
-          </>
+          <Check className="w-3.5 h-3.5 text-emerald-400" />
         ) : (
-          <>
-            <Copy className="w-3.5 h-3.5" />
-            <span className="text-[11px]">Copy</span>
-          </>
+          <Copy className="w-3.5 h-3.5" />
         )}
       </button>
 
@@ -207,23 +201,17 @@ export function AiMessageActions({ text, onRetry }: AiMessageActionsProps) {
       <button
         type="button"
         onClick={handleSpeak}
-        className={`bg-transparent border border-white/10 rounded-full px-2.5 py-1 text-xs transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 ${
+        className={`w-7 h-7 rounded-full bg-[#2f2f2f] border border-white/10 flex items-center justify-center transition cursor-pointer shadow-xs active:scale-95 ${
           isSpeaking
-            ? 'text-sky-400 bg-sky-500/10 border-sky-500/30'
-            : 'text-zinc-400 hover:text-white hover:bg-[#2f2f2f]'
+            ? 'text-sky-400 bg-sky-500/20 border-sky-500/40'
+            : 'text-zinc-400 hover:text-white hover:bg-white/10'
         }`}
         title={isSpeaking ? 'Stop reading' : 'Read aloud'}
       >
         {isSpeaking ? (
-          <>
-            <Square className="w-3.5 h-3.5 fill-sky-400 text-sky-400" />
-            <span className="text-[11px] text-sky-400 font-medium">Stop</span>
-          </>
+          <Square className="w-3 h-3 fill-sky-400 text-sky-400" />
         ) : (
-          <>
-            <Volume2 className="w-3.5 h-3.5" />
-            <span className="text-[11px]">Read</span>
-          </>
+          <Volume2 className="w-3.5 h-3.5" />
         )}
       </button>
 
@@ -231,32 +219,30 @@ export function AiMessageActions({ text, onRetry }: AiMessageActionsProps) {
       <button
         type="button"
         onClick={onRetry}
-        className="bg-transparent border border-white/10 rounded-full px-2.5 py-1 text-xs text-zinc-400 hover:text-white hover:bg-[#2f2f2f] transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+        className="w-7 h-7 rounded-full bg-[#2f2f2f] border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 flex items-center justify-center transition cursor-pointer shadow-xs active:scale-95"
         title="Regenerate response"
       >
         <RefreshCw className="w-3.5 h-3.5" />
-        <span className="text-[11px]">Retry</span>
       </button>
 
       {/* Download button */}
       <button
         type="button"
         onClick={handleDownload}
-        className="bg-transparent border border-white/10 rounded-full px-2.5 py-1 text-xs text-zinc-400 hover:text-white hover:bg-[#2f2f2f] transition flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+        className="w-7 h-7 rounded-full bg-[#2f2f2f] border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 flex items-center justify-center transition cursor-pointer shadow-xs active:scale-95"
         title="Download response as .txt"
       >
         <Download className="w-3.5 h-3.5" />
-        <span className="text-[11px]">Download</span>
       </button>
 
       {/* Thumbs up */}
       <button
         type="button"
         onClick={handleLike}
-        className={`p-1.5 rounded-full border border-white/10 transition cursor-pointer active:scale-95 ${
+        className={`w-7 h-7 rounded-full border border-white/10 flex items-center justify-center transition cursor-pointer active:scale-95 ${
           liked === true
             ? 'text-emerald-400 bg-emerald-500/20 border-emerald-500/40'
-            : 'text-zinc-400 hover:text-white hover:bg-[#2f2f2f]'
+            : 'bg-[#2f2f2f] text-zinc-400 hover:text-white hover:bg-white/10'
         }`}
         title="Good response"
       >
@@ -267,10 +253,10 @@ export function AiMessageActions({ text, onRetry }: AiMessageActionsProps) {
       <button
         type="button"
         onClick={handleDislike}
-        className={`p-1.5 rounded-full border border-white/10 transition cursor-pointer active:scale-95 ${
+        className={`w-7 h-7 rounded-full border border-white/10 flex items-center justify-center transition cursor-pointer active:scale-95 ${
           liked === false
             ? 'text-red-400 bg-red-500/20 border-red-500/40'
-            : 'text-zinc-400 hover:text-white hover:bg-[#2f2f2f]'
+            : 'bg-[#2f2f2f] text-zinc-400 hover:text-white hover:bg-white/10'
         }`}
         title="Bad response"
       >
