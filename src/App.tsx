@@ -1,3 +1,4 @@
+
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -19,10 +20,8 @@ import SubscriptionModal from './components/SubscriptionModal';
 
 export default function App() {
   /**
-   * Fix 3: Main interface Gromina always first:
-   * On app initial load activeView must be home Gromina main interface, not teacher or any feature.
-   * Set useEffect on mount setActiveView home. Refresh also lands on home. Features open only on tap.
-   * New Chat button always goes to home with empty chat. No feature opens by default.
+   * Gromina home is the default view.
+   * Refresh and initial load always open the home interface.
    */
   const [currentView, setCurrentView] = useState<FeatureView>('home');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -37,16 +36,12 @@ export default function App() {
   const [businessMessages, setBusinessMessages] = useState<ChatMessage[]>([]);
   const [codexMessages, setCodexMessages] = useState<ChatMessage[]>([]);
 
-  // Compare Mode state (available in Gromina main and My Teacher only)
+  // Compare Mode state
   const [compareMode, setCompareMode] = useState(false);
   const [comparePrompt, setComparePrompt] = useState<string | null>(null);
   const [compareResponses, setCompareResponses] = useState<Record<string, string> | null>(null);
 
-  /**
-   * Fix 1: Real Sign Up Gmail required:
-   * Auth flow must require Gmail connect before login allowed.
-   * State gmailConnected boolean false initially isLoggedIn false authMode none signup login.
-   */
+  // Authentication state
   const [authMode, setAuthMode] = useState<'none' | 'signup' | 'login'>('none');
   const [gmailConnected, setGmailConnected] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -62,22 +57,23 @@ export default function App() {
   });
   const [isBusinessCreated, setIsBusinessCreated] = useState(false);
 
-  // Media Modals
+  // Media modals
   const [isCamModalOpen, setIsCamModalOpen] = useState(false);
   const [isVoiceOverlayOpen, setIsVoiceOverlayOpen] = useState(false);
 
-  // Chat History list - initially empty for new user
+  // Chat history
   const [chatHistory, setChatHistory] = useState<
     { id: string; title: string; view: FeatureView; date: string }[]
   >([]);
 
   const pushChatToHistory = (title: string, view: FeatureView) => {
     const trimmedTitle = title.trim().slice(0, 30) || 'New Conversation';
+
     setChatHistory(prev => {
-      // If previous entry was 'New Chat', update its title
       if (prev.length > 0 && prev[0].title === 'New Chat') {
         return [{ ...prev[0], title: trimmedTitle, view }, ...prev.slice(1)];
       }
+
       return [
         {
           id: 'hist_' + Date.now(),
@@ -90,11 +86,7 @@ export default function App() {
     });
   };
 
-  /**
-   * 1. New Chat behavior:
-   * Must setActiveView to home, setMessages to empty array, clear compare states,
-   * close mobile drawer, and push new chat to history dynamically.
-   */
+  // New Chat behavior
   const handleNewChat = () => {
     setCurrentView('home');
     setHomeMessages([]);
@@ -103,14 +95,15 @@ export default function App() {
     setCompareResponses(null);
     setIsMobileMenuOpen(false);
 
-    // Push real new chat to history dynamically
     const newId = 'hist_' + Date.now();
+
     setChatHistory(prev => [
       { id: newId, title: 'New Chat', view: 'home', date: 'Today' },
       ...prev
     ]);
   };
 
+  // Select chat history item
   const handleSelectHistoryItem = (item: {
     id: string;
     title: string;
@@ -120,25 +113,32 @@ export default function App() {
     setCurrentView(item.view);
   };
 
+  // Delete chat history item
   const handleDeleteHistoryItem = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setChatHistory(prev => prev.filter(item => item.id !== id));
   };
 
   // Compare updates handler
-  const handleUpdateCompareResponses = (prompt: string, responses: Record<string, string>) => {
+  const handleUpdateCompareResponses = (
+    prompt: string,
+    responses: Record<string, string>
+  ) => {
     setComparePrompt(prompt);
     setCompareResponses(responses);
   };
 
-  // When camera snaps a photo, attach to active conversation
+  // Camera capture handler
   const handleCameraCapture = (attachment: ChatAttachment) => {
     const userMsg: ChatMessage = {
       id: 'att_' + Date.now(),
       sender: 'user',
       text: 'Attached photo from camera',
       attachments: [attachment],
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
     };
 
     if (currentView === 'home') {
@@ -152,13 +152,16 @@ export default function App() {
     }
   };
 
-  // Voice overlay transcribed text handler
+  // Voice transcription handler
   const handleVoiceTranscribed = (text: string) => {
     const userMsg: ChatMessage = {
       id: 'v_usr_' + Date.now(),
       sender: 'user',
       text,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
     };
 
     if (currentView === 'home') {
@@ -172,6 +175,7 @@ export default function App() {
     }
   };
 
+  // Authentication success
   const handleAuthSuccess = (email: string) => {
     setIsLoggedIn(true);
     setGmailConnected(true);
@@ -179,11 +183,13 @@ export default function App() {
     setAuthMode('none');
   };
 
+  // Logout
   const handleLogout = () => {
     setIsLoggedIn(false);
     setGmailConnected(false);
   };
 
+  // Subscription upgrade
   const handlePlanUpgraded = (plan: 'plus' | 'pro') => {
     setUserPlan(plan);
     setIsLoggedIn(true);
@@ -191,8 +197,9 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-[100dvh] h-[100dvh] w-full bg-[#212121] text-zinc-100 font-sans select-text overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth overscroll-contain">
-      {/* Sidebar 280px desktop, drawer on mobile */}
+    <div className="flex flex-col md:flex-row min-h-[100dvh] h-auto w-full bg-[#212121] text-zinc-100 font-sans select-text overflow-x-auto overflow-y-visible [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth">
+
+      {/* Sidebar */}
       <Sidebar
         currentView={currentView}
         onSelectView={view => {
@@ -213,9 +220,10 @@ export default function App() {
         onOpenSubscription={() => setShowSubscription(true)}
       />
 
-      {/* Main View Area - FIXED SCROLL */}
-      <main className="flex-1 flex flex-col min-w-0 min-h-0 h-[100dvh] overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth relative bg-[#212121]">
-        {/* Mobile Header Bar */}
+      {/* Main View Area - Scroll-enabled */}
+      <main className="flex-1 flex flex-col min-w-0 min-h-[100dvh] h-auto overflow-x-auto overflow-y-visible [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth relative bg-[#212121]">
+
+        {/* Mobile Header */}
         <div className="md:hidden h-12 bg-[#171717] border-b border-white/10 flex items-center justify-between px-4 flex-shrink-0 z-30">
           <button
             onClick={() => setIsMobileMenuOpen(true)}
@@ -224,11 +232,15 @@ export default function App() {
           >
             <Menu className="w-5 h-5" />
           </button>
-          <span className="font-bold text-sm tracking-tight text-white">Gromina</span>
+
+          <span className="font-bold text-sm tracking-tight text-white">
+            Gromina
+          </span>
+
           <div className="w-5" />
         </div>
 
-        {/* View switching: Gromina home is default */}
+        {/* Home View */}
         {currentView === 'home' && (
           <HomeView
             messages={homeMessages}
@@ -241,7 +253,9 @@ export default function App() {
               });
             }}
             onUpdateMessage={(id, text) => {
-              setHomeMessages(prev => prev.map(m => (m.id === id ? { ...m, text } : m)));
+              setHomeMessages(prev =>
+                prev.map(m => (m.id === id ? { ...m, text } : m))
+              );
             }}
             onOpenVoiceOverlay={() => setIsVoiceOverlayOpen(true)}
             onOpenCamModal={() => setIsCamModalOpen(true)}
@@ -253,6 +267,7 @@ export default function App() {
           />
         )}
 
+        {/* Teacher View */}
         {currentView === 'teacher' && (
           <TeacherView
             messages={teacherMessages}
@@ -265,7 +280,9 @@ export default function App() {
               });
             }}
             onUpdateMessage={(id, text) => {
-              setTeacherMessages(prev => prev.map(m => (m.id === id ? { ...m, text } : m)));
+              setTeacherMessages(prev =>
+                prev.map(m => (m.id === id ? { ...m, text } : m))
+              );
             }}
             onOpenVoiceOverlay={() => setIsVoiceOverlayOpen(true)}
             onOpenCamModal={() => setIsCamModalOpen(true)}
@@ -277,6 +294,7 @@ export default function App() {
           />
         )}
 
+        {/* Business View */}
         {currentView === 'business' && (
           <BusinessView
             businessConfig={businessConfig}
@@ -293,15 +311,19 @@ export default function App() {
               });
             }}
             onUpdateMessage={(id, text) => {
-              setBusinessMessages(prev => prev.map(m => (m.id === id ? { ...m, text } : m)));
+              setBusinessMessages(prev =>
+                prev.map(m => (m.id === id ? { ...m, text } : m))
+              );
             }}
             onOpenVoiceOverlay={() => setIsVoiceOverlayOpen(true)}
             onOpenCamModal={() => setIsCamModalOpen(true)}
           />
         )}
 
+        {/* Website View */}
         {currentView === 'website' && <WebsiteView />}
 
+        {/* Codex View */}
         {currentView === 'codex' && (
           <CodexView
             messages={codexMessages}
@@ -314,7 +336,9 @@ export default function App() {
               });
             }}
             onUpdateMessage={(id, text) => {
-              setCodexMessages(prev => prev.map(m => (m.id === id ? { ...m, text } : m)));
+              setCodexMessages(prev =>
+                prev.map(m => (m.id === id ? { ...m, text } : m))
+              );
             }}
             onOpenVoiceOverlay={() => setIsVoiceOverlayOpen(true)}
             onOpenCamModal={() => setIsCamModalOpen(true)}
@@ -322,7 +346,7 @@ export default function App() {
         )}
       </main>
 
-      {/* Auth Modal (Sign up / Log in with required Gmail connect) */}
+      {/* Authentication Modal */}
       <AuthModal
         isOpen={authMode !== 'none'}
         initialMode={authMode === 'none' ? 'login' : authMode}
@@ -332,7 +356,7 @@ export default function App() {
         onSuccess={handleAuthSuccess}
       />
 
-      {/* Subscription Full-screen Page & Payment Modal */}
+      {/* Subscription Modal */}
       <SubscriptionModal
         isOpen={showSubscription}
         onClose={() => setShowSubscription(false)}
@@ -340,14 +364,14 @@ export default function App() {
         onPlanUpgraded={handlePlanUpgraded}
       />
 
-      {/* Camera Capture Modal */}
+      {/* Camera Modal */}
       <CameraModal
         isOpen={isCamModalOpen}
         onClose={() => setIsCamModalOpen(false)}
         onCapture={handleCameraCapture}
       />
 
-      {/* Voice Assistant Overlay */}
+      {/* Voice Overlay */}
       <VoiceOverlay
         isOpen={isVoiceOverlayOpen}
         onClose={() => setIsVoiceOverlayOpen(false)}
