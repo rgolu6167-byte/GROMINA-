@@ -38,8 +38,6 @@ export default function HomeView({
   const prevMessagesLengthRef = useRef(messages.length);
 
   // Auto-scroll logic like ChatGPT:
-  // When user sends a message, scroll so the question is visible.
-  // When AI answers, scroll to TOP of that assistant message to show where answer starts.
   useEffect(() => {
     if (messages.length === 0) {
       prevMessagesLengthRef.current = 0;
@@ -88,7 +86,6 @@ export default function HomeView({
       onUpdateMessage(msgId, trimmed);
     }
 
-    // Retrigger AI response
     setTimeout(() => {
       const reply = generateGeneralHomeResponse(trimmed);
       const assistantMsg: ChatMessage = {
@@ -142,13 +139,11 @@ export default function HomeView({
 
   const handleSend = (text: string, attachments: ChatAttachment[]) => {
     if (compareMode) {
-      // In compare mode, generate responses for all 5 models simultaneously
       const responses = generateCompareResponses(text);
       onUpdateCompareResponses(text, responses);
       return;
     }
 
-    // Normal mode: append user message
     const userMsg: ChatMessage = {
       id: 'h_usr_' + Date.now(),
       sender: 'user',
@@ -158,11 +153,9 @@ export default function HomeView({
     };
     onSendMessage(userMsg);
 
-    // Prepare compare responses in background so Compare is instant if clicked
     const responses = generateCompareResponses(text);
     onUpdateCompareResponses(text, responses);
 
-    // Normal assistant reply after short realistic delay
     setTimeout(() => {
       const reply = generateGeneralHomeResponse(text);
       const assistantMsg: ChatMessage = {
@@ -176,9 +169,9 @@ export default function HomeView({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full min-h-0 bg-[#212121] relative [touch-action:pan-x_pan-y_pinch-zoom]">
+    <div className="flex-1 flex flex-col h-full min-h-0 w-full min-w-0 bg-[#212121] relative overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth overscroll-contain">
       {/* Top bar with Compare button */}
-      <header className="h-14 bg-[#171717] border-b border-white/10 flex justify-between items-center px-4 flex-shrink-0 z-10">
+      <header className="h-14 bg-[#171717] border-b border-white/10 flex justify-between items-center px-4 flex-shrink-0 z-10 w-full">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-bold text-white text-xs shadow-xs">
             G
@@ -186,7 +179,6 @@ export default function HomeView({
           <span className="font-bold text-white text-sm tracking-tight">Gromina</span>
         </div>
 
-        {/* Right side: Compare button */}
         <button
           onClick={handleToggle}
           disabled={!compareEnabled}
@@ -204,15 +196,14 @@ export default function HomeView({
         </button>
       </header>
 
-      {/* Main Area: chat-scroll with zoom and scroll like ChatGPT */}
-      <div ref={homeScrollRef} className="chat-scroll flex-1 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth overscroll-contain px-4 py-4 pb-4 flex flex-col min-h-0">
+      {/* Main Area: FIXED - zoom scroll up-down left-right both */}
+      <div ref={homeScrollRef} className="chat-scroll flex-1 w-full min-w-0 min-h-0 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth overscroll-contain px-4 py-4 pb-4 flex flex-col">
         {compareMode ? (
-          /* Compare Grid mode */
           <CompareGrid currentPrompt={comparePrompt} responses={compareResponses} />
         ) : messages.length === 0 ? (
-          /* Clean Empty State - No example chats */
-          <div className="m-auto flex flex-col items-center justify-center text-center p-6 max-w-lg">
-            <div className="w-16 h-16 rounded-full bg-[#2f2f2f] border border-white/10 flex items-center justify-center mb-5 shadow-lg">
+          /* Empty State - FIXED for zoom scroll */
+          <div className="flex-1 w-full min-w-0 min-h-[60vh] flex flex-col items-center justify-center text-center p-6 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom]">
+            <div className="w-16 h-16 rounded-full bg-[#2f2f2f] border border-white/10 flex items-center justify-center mb-5 shadow-lg shrink-0">
               <span className="text-2xl font-bold text-white">G</span>
             </div>
             <h2 className="text-2xl font-bold text-white tracking-tight mb-2">Gromina</h2>
@@ -221,28 +212,24 @@ export default function HomeView({
             </p>
           </div>
         ) : (
-          /* Normal Chat Messages Stream: ChatGPT style user right, AI left */
-          <div className="max-w-3xl w-full mx-auto space-y-4 pb-6">
+          /* Chat Messages - FIXED horizontal scroll on zoom */
+          <div className="max-w-3xl w-full min-w-0 mx-auto space-y-4 pb-6 overflow-x-visible">
             {messages.map(msg => (
               <div
                 key={msg.id}
                 id={`msg-${msg.id}`}
-                className={`group w-full flex ${
+                className={`group w-full min-w-0 flex ${
                   msg.sender === 'user' ? 'justify-end' : 'justify-start'
                 } scroll-mt-4`}
               >
                 {msg.sender === 'user' ? (
-                  /* USER MESSAGE: Right side like ChatGPT */
-                  <div className="w-full flex justify-end items-start gap-2.5">
-                    <div className="flex flex-col items-end max-w-[70%] md:max-w-[60%]">
-                      {/* Timestamp above bubble right aligned */}
+                  <div className="w-full min-w-0 flex justify-end items-start gap-2.5">
+                    <div className="flex flex-col items-end max-w-[70%] md:max-w-[60%] min-w-0">
                       <span className="text-[11px] text-zinc-500 mb-1 pr-1 font-normal select-none">
                         You {msg.timestamp}
                       </span>
 
-                      {/* User bubble: thin patla like ChatGPT */}
-                      <div className="w-fit max-w-[70%] md:max-w-[60%] bg-[#2f2f2f] text-white rounded-2xl rounded-br-sm px-3 py-2 text-sm leading-5 font-normal break-words border border-white/10 shadow-xs space-y-1.5">
-                        {/* Attachment chips if any */}
+                      <div className="w-fit max-w-full bg-[#2f2f2f] text-white rounded-2xl rounded-br-sm px-3 py-2 text-sm leading-5 font-normal break-words border border-white/10 shadow-xs space-y-1.5 min-w-0">
                         {msg.attachments && msg.attachments.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 pt-0.5">
                             {msg.attachments.map(att => (
@@ -265,7 +252,6 @@ export default function HomeView({
                           </div>
                         )}
 
-                        {/* User message or inline editor */}
                         {editingMsgId === msg.id ? (
                           <div className="mt-1 space-y-2 min-w-[220px]">
                             <textarea
@@ -293,11 +279,10 @@ export default function HomeView({
                             </div>
                           </div>
                         ) : (
-                          <p className="whitespace-pre-wrap">{msg.text}</p>
+                          <p className="whitespace-pre-wrap break-words">{msg.text}</p>
                         )}
                       </div>
 
-                      {/* Below user bubble: action row Copy Edit Retry right aligned */}
                       {editingMsgId !== msg.id && (
                         <UserMessageActions
                           text={msg.text}
@@ -307,31 +292,25 @@ export default function HomeView({
                       )}
                     </div>
 
-                    {/* Small User avatar on right */}
                     <div className="w-7 h-7 rounded-full bg-zinc-700 text-white flex items-center justify-center flex-shrink-0 mt-0.5 text-xs">
                       <User className="w-3.5 h-3.5" />
                     </div>
                   </div>
                 ) : (
-                  /* AI MESSAGE: Left side like ChatGPT */
-                  <div className="w-full flex justify-start items-start gap-2.5">
-                    {/* G logo avatar on left */}
+                  <div className="w-full min-w-0 flex justify-start items-start gap-2.5">
                     <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-bold text-white text-xs flex-shrink-0 mt-0.5 shadow-xs">
                       G
                     </div>
 
-                    <div className="flex flex-col items-start max-w-[82%] md:max-w-[75%]">
-                      {/* Timestamp above bubble left aligned */}
+                    <div className="flex flex-col items-start max-w-[82%] md:max-w-[75%] min-w-0">
                       <span className="text-[11px] text-zinc-500 mb-1 pl-1 font-normal select-none">
                         Gromina {msg.timestamp}
                       </span>
 
-                      {/* AI bubble */}
-                      <div className="w-fit max-w-[82%] md:max-w-[75%] bg-[#2f2f2f]/60 border border-white/5 rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm leading-6 whitespace-pre-wrap break-words text-left text-zinc-100 shadow-xs space-y-2">
-                        <p className="whitespace-pre-wrap">{msg.text}</p>
+                      <div className="w-fit max-w-full bg-[#2f2f2f]/60 border border-white/5 rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm leading-6 whitespace-pre-wrap break-words text-left text-zinc-100 shadow-xs space-y-2 min-w-0">
+                        <p className="whitespace-pre-wrap break-words">{msg.text}</p>
                       </div>
 
-                      {/* Below AI bubble: action row Copy Sound Retry Download left aligned */}
                       <AiMessageActions
                         text={msg.text}
                         onRetry={() => handleRetryAiResponse(msg.id)}
@@ -346,7 +325,6 @@ export default function HomeView({
         )}
       </div>
 
-      {/* Shared Bottom Input Bar */}
       <BottomInputBar
         onSendMessage={handleSend}
         onOpenVoiceOverlay={onOpenVoiceOverlay}
