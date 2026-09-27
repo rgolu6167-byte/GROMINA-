@@ -191,7 +191,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen min-h-screen w-full bg-[#212121] overflow-hidden text-zinc-100 font-sans select-text">
+    <div className="flex flex-col md:flex-row min-h-[100dvh] h-[100dvh] w-full bg-[#212121] text-zinc-100 font-sans select-text overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth overscroll-contain">
       {/* Sidebar 280px desktop, drawer on mobile */}
       <Sidebar
         currentView={currentView}
@@ -213,8 +213,8 @@ export default function App() {
         onOpenSubscription={() => setShowSubscription(true)}
       />
 
-      {/* Main View Area */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative bg-[#212121]">
+      {/* Main View Area - FIXED SCROLL */}
+      <main className="flex-1 flex flex-col min-w-0 min-h-0 h-[100dvh] overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth relative bg-[#212121]">
         {/* Mobile Header Bar */}
         <div className="md:hidden h-12 bg-[#171717] border-b border-white/10 flex items-center justify-between px-4 flex-shrink-0 z-30">
           <button
