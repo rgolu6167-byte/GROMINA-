@@ -90,7 +90,7 @@ export default function WebsiteView() {
       </header>
 
       {/* Main flex flex-col md:flex-row */}
-      <div className="flex-1 flex flex-col md:flex-row chat-scroll overflow-x-auto overflow-y-auto min-h-0 [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch]">
+      <div className="flex-1 flex flex-col md:flex-row chat-scroll overflow-x-auto overflow-y-auto min-h-0 [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] overscroll-contain">
         {/* Left panel w-380px border-r white/10 bg #1e1e1e flex flex-col */}
         <div className="w-full md:w-[380px] border-r border-white/10 bg-[#1e1e1e] flex flex-col flex-shrink-0">
           <label className="px-4 pt-4 text-sm text-zinc-400 font-medium">

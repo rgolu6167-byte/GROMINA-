@@ -49,9 +49,35 @@ export default function TeacherView({
   const [editText, setEditText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const teacherScrollRef = useRef<HTMLDivElement | null>(null);
+  const prevMessagesLengthRef = useRef(messages.length);
 
+  // Auto-scroll logic like ChatGPT:
+  // When user sends a message, scroll to bottom.
+  // When AI answers, scroll to TOP of that assistant message so answer starts in view.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    if (messages.length === 0) {
+      prevMessagesLengthRef.current = 0;
+      return;
+    }
+
+    const isNew = messages.length > prevMessagesLengthRef.current;
+    prevMessagesLengthRef.current = messages.length;
+
+    if (isNew) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg.sender === 'assistant') {
+        const el = document.getElementById(`msg-${lastMsg.id}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          setTimeout(() => {
+            document.getElementById(`msg-${lastMsg.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 60);
+        }
+      } else {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    }
   }, [messages]);
 
   const handleStartEdit = (msg: ChatMessage) => {
@@ -285,7 +311,7 @@ export default function TeacherView({
       </div>
 
       {/* Main chat stream area or Compare Grid */}
-      <div ref={teacherScrollRef} className="chat-scroll flex-1 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth px-4 py-4 pb-4 flex flex-col min-h-0">
+      <div ref={teacherScrollRef} className="chat-scroll flex-1 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth overscroll-contain px-4 py-4 pb-4 flex flex-col min-h-0">
         {compareMode ? (
           <CompareGrid currentPrompt={comparePrompt} responses={compareResponses} />
         ) : messages.length === 0 ? (
@@ -304,23 +330,26 @@ export default function TeacherView({
             {messages.map(msg => (
               <div
                 key={msg.id}
-                className={`group relative flex gap-3.5 ${
+                id={`msg-${msg.id}`}
+                className={`group w-full flex ${
                   msg.sender === 'user' ? 'justify-end' : 'justify-start'
-                }`}
+                } scroll-mt-4`}
               >
-                {msg.sender === 'assistant' && (
-                  <div className="w-8 h-8 rounded-full bg-[#2f2f2f] border border-white/10 flex items-center justify-center flex-shrink-0 mt-0.5 text-sky-400">
-                    <Bot className="w-4 h-4" />
-                  </div>
-                )}
+                <div className={`flex items-start gap-2.5 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  {msg.sender === 'assistant' && (
+                    <div className="w-8 h-8 rounded-full bg-[#2f2f2f] border border-white/10 flex items-center justify-center flex-shrink-0 mt-0.5 text-sky-400">
+                      <Bot className="w-4 h-4" />
+                    </div>
+                  )}
 
-                <div
-                  className={`max-w-[85%] rounded-2xl p-4.5 space-y-3 ${
-                    msg.sender === 'user'
-                      ? 'bg-[#2f2f2f] text-white border border-white/10'
-                      : 'bg-[#292929] text-zinc-100 border border-white/10 shadow-md'
-                  }`}
-                >
+                  <div className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
+                    <div
+                      className={`w-fit rounded-2xl px-4 py-3 text-[14.5px] leading-6 whitespace-pre-wrap break-words ${
+                        msg.sender === 'user'
+                          ? 'max-w-[70vw] md:max-w-[60vw] lg:max-w-[500px] bg-[#2f2f2f] text-white rounded-br-sm border border-white/10 shadow-sm space-y-2'
+                          : 'max-w-[80vw] md:max-w-[75vw] lg:max-w-[650px] bg-[#2f2f2f]/60 text-zinc-100 border border-white/5 rounded-bl-sm shadow-md space-y-3 text-left'
+                      }`}
+                    >
                   {/* Sender & Controls header */}
                   <div className="flex items-center justify-between text-xs text-zinc-400 pb-1 border-b border-white/5">
                     <span className="font-semibold text-zinc-300">
@@ -495,29 +524,31 @@ export default function TeacherView({
                   ) : (
                     <p className="whitespace-pre-wrap text-sm">{msg.text}</p>
                   )}
+                    </div>
 
-                  {/* Actions row for user or assistant */}
-                  {!(msg.sender === 'user' && editingMsgId === msg.id) && (
-                    msg.sender === 'user' ? (
-                      <UserMessageActions
-                        text={msg.text}
-                        onEdit={() => handleStartEdit(msg)}
-                        onRetry={() => handleRetryUserPrompt(msg.text)}
-                      />
-                    ) : (
-                      <AiMessageActions
-                        text={msg.text}
-                        onRetry={() => handleRetryAiResponse(msg.id)}
-                      />
-                    )
+                    {/* Actions row for user or assistant */}
+                    {!(msg.sender === 'user' && editingMsgId === msg.id) && (
+                      msg.sender === 'user' ? (
+                        <UserMessageActions
+                          text={msg.text}
+                          onEdit={() => handleStartEdit(msg)}
+                          onRetry={() => handleRetryUserPrompt(msg.text)}
+                        />
+                      ) : (
+                        <AiMessageActions
+                          text={msg.text}
+                          onRetry={() => handleRetryAiResponse(msg.id)}
+                        />
+                      )
+                    )}
+                  </div>
+
+                  {msg.sender === 'user' && (
+                    <div className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5 text-white text-xs">
+                      <User className="w-3.5 h-3.5" />
+                    </div>
                   )}
                 </div>
-
-                {msg.sender === 'user' && (
-                  <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5 text-white">
-                    <User className="w-4 h-4" />
-                  </div>
-                )}
               </div>
             ))}
             <div ref={messagesEndRef} />

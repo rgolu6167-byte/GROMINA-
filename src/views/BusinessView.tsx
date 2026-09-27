@@ -55,9 +55,35 @@ export default function BusinessView({
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const businessScrollRef = useRef<HTMLDivElement | null>(null);
+  const prevMessagesLengthRef = useRef(messages.length);
 
+  // Auto-scroll logic like ChatGPT:
+  // When user sends a message, scroll to bottom.
+  // When AI answers, scroll to TOP of assistant message so answer starts in view.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length === 0) {
+      prevMessagesLengthRef.current = 0;
+      return;
+    }
+
+    const isNew = messages.length > prevMessagesLengthRef.current;
+    prevMessagesLengthRef.current = messages.length;
+
+    if (isNew) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg.sender === 'assistant') {
+        const el = document.getElementById(`msg-${lastMsg.id}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          setTimeout(() => {
+            document.getElementById(`msg-${lastMsg.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 60);
+        }
+      } else {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    }
   }, [messages]);
 
   const isFormValid =
@@ -173,7 +199,7 @@ export default function BusinessView({
   // State 1: Not Created (New User setup screen)
   if (!isCreated) {
     return (
-      <div ref={businessScrollRef} className="flex-1 overflow-y-auto overflow-x-auto min-h-0 bg-[#212121] p-6 flex flex-col justify-center [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth">
+      <div ref={businessScrollRef} className="flex-1 overflow-y-auto overflow-x-auto min-h-0 bg-[#212121] p-6 flex flex-col justify-center [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth overscroll-contain">
         <div className="w-full max-w-[560px] mx-auto mt-4 mb-8">
           {/* Header */}
           <div className="text-center mb-6">
@@ -284,7 +310,7 @@ export default function BusinessView({
             </div>
 
             {/* Chat List */}
-            <div ref={businessScrollRef} className="bg-[#1b1b1b] border border-white/10 rounded-2xl p-4 min-h-[260px] max-h-[380px] chat-scroll flex-1 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth space-y-4">
+            <div ref={businessScrollRef} className="bg-[#1b1b1b] border border-white/10 rounded-2xl p-4 min-h-[260px] max-h-[380px] chat-scroll flex-1 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth overscroll-contain space-y-4">
               {messages.length === 0 ? (
                 <div className="h-44 flex flex-col items-center justify-center text-center text-zinc-500 text-xs">
                   <Bot className="w-8 h-8 text-zinc-600 mb-2" />
@@ -294,73 +320,90 @@ export default function BusinessView({
                 messages.map(msg => (
                   <div
                     key={msg.id}
-                    className={`group relative flex gap-3 ${
+                    id={`msg-${msg.id}`}
+                    className={`group w-full flex ${
                       msg.sender === 'user' ? 'justify-end' : 'justify-start'
-                    }`}
+                    } scroll-mt-4`}
                   >
-                    {msg.sender === 'assistant' && (
-                      <div className="w-7 h-7 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center flex-shrink-0 text-xs font-bold">
-                        AI
-                      </div>
-                    )}
-                    <div
-                      className={`max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-relaxed ${
-                        msg.sender === 'user'
-                          ? 'bg-[#2f2f2f] text-white border border-white/10'
-                          : 'bg-[#262626] text-zinc-200 border border-white/10'
-                      }`}
-                    >
-                      {/* Message content or inline editor */}
-                      {msg.sender === 'user' && editingMsgId === msg.id ? (
-                        <div className="mt-1 space-y-2">
-                          <textarea
-                            value={editText}
-                            onChange={e => setEditText(e.target.value)}
-                            className="w-full bg-[#1e1e1e] border border-white/20 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-white/40 resize-none min-h-[60px] leading-relaxed"
-                            rows={2}
-                            autoFocus
-                          />
-                          <div className="flex justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={handleCancelEdit}
-                              className="px-2.5 py-0.5 text-[11px] text-zinc-300 hover:text-white rounded-full border border-white/10 hover:bg-white/10 transition cursor-pointer"
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleSaveEdit(msg.id)}
-                              className="px-3 py-0.5 text-[11px] font-semibold text-black bg-white hover:bg-zinc-200 rounded-full transition cursor-pointer shadow-xs"
-                            >
-                              Save
-                            </button>
+                    {msg.sender === 'user' ? (
+                      /* USER MESSAGE: Right side like ChatGPT */
+                      <div className="w-full flex justify-end items-start gap-2.5">
+                        <div className="flex flex-col items-end max-w-[70%] md:max-w-[60%]">
+                          {/* User bubble */}
+                          <div className="w-fit max-w-[70%] md:max-w-[60%] bg-[#2f2f2f] text-white rounded-2xl rounded-br-sm px-4 py-3 text-[14.5px] leading-6 whitespace-pre-wrap break-words border border-white/10 shadow-sm space-y-2">
+                            {/* Message content or inline editor */}
+                            {editingMsgId === msg.id ? (
+                              <div className="mt-1 space-y-2 min-w-[220px]">
+                                <textarea
+                                  value={editText}
+                                  onChange={e => setEditText(e.target.value)}
+                                  className="w-full bg-[#1e1e1e] border border-white/20 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-white/40 resize-none min-h-[60px] leading-relaxed [touch-action:manipulation]"
+                                  rows={2}
+                                  autoFocus
+                                />
+                                <div className="flex justify-end gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={handleCancelEdit}
+                                    className="px-2.5 py-0.5 text-[11px] text-zinc-300 hover:text-white rounded-full border border-white/10 hover:bg-white/10 transition cursor-pointer"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSaveEdit(msg.id)}
+                                    className="px-3 py-0.5 text-[11px] font-semibold text-black bg-white hover:bg-zinc-200 rounded-full transition cursor-pointer shadow-xs"
+                                  >
+                                    Save
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <p className="whitespace-pre-wrap">{msg.text}</p>
+                                <span className="block text-[10px] text-zinc-400 text-right mt-1">
+                                  {msg.timestamp}
+                                </span>
+                              </>
+                            )}
                           </div>
-                        </div>
-                      ) : (
-                        <>
-                          <p className="whitespace-pre-wrap">{msg.text}</p>
-                          <span className="block text-[10px] text-zinc-500 text-right mt-1.5">
-                            {msg.timestamp}
-                          </span>
-                          {msg.sender === 'user' ? (
+
+                          {/* Below user bubble: action row Copy Edit Retry right aligned */}
+                          {editingMsgId !== msg.id && (
                             <UserMessageActions
                               text={msg.text}
                               onEdit={() => handleStartEdit(msg)}
                               onRetry={() => handleRetryUserPrompt(msg.text)}
                             />
-                          ) : (
-                            <AiMessageActions
-                              text={msg.text}
-                              onRetry={() => handleRetryAiResponse(msg.id)}
-                            />
                           )}
-                        </>
-                      )}
-                    </div>
-                    {msg.sender === 'user' && (
-                      <div className="w-7 h-7 rounded-full bg-zinc-700 text-white flex items-center justify-center flex-shrink-0 text-xs">
-                        <User className="w-3.5 h-3.5" />
+                        </div>
+
+                        <div className="w-7 h-7 rounded-full bg-zinc-700 text-white flex items-center justify-center flex-shrink-0 text-xs mt-0.5">
+                          <User className="w-3.5 h-3.5" />
+                        </div>
+                      </div>
+                    ) : (
+                      /* AI MESSAGE: Left side like ChatGPT */
+                      <div className="w-full flex justify-start items-start gap-3">
+                        <div className="w-7 h-7 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center flex-shrink-0 text-xs font-bold mt-0.5">
+                          AI
+                        </div>
+
+                        <div className="flex flex-col items-start max-w-[80%] md:max-w-[75%]">
+                          {/* AI bubble */}
+                          <div className="w-fit max-w-[80%] md:max-w-[75%] bg-[#2f2f2f]/60 text-zinc-100 border border-white/5 rounded-2xl rounded-bl-sm px-4 py-3 text-[14.5px] leading-6 whitespace-pre-wrap break-words text-left shadow-sm space-y-2">
+                            <p className="whitespace-pre-wrap">{msg.text}</p>
+                            <span className="block text-[10px] text-zinc-400 text-left mt-1">
+                              {msg.timestamp}
+                            </span>
+                          </div>
+
+                          {/* Below AI bubble: action row Copy Sound Retry Download left aligned */}
+                          <AiMessageActions
+                            text={msg.text}
+                            onRetry={() => handleRetryAiResponse(msg.id)}
+                          />
+                        </div>
                       </div>
                     )}
                   </div>

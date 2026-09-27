@@ -35,10 +35,35 @@ export default function HomeView({
   const [editText, setEditText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const homeScrollRef = useRef<HTMLDivElement | null>(null);
+  const prevMessagesLengthRef = useRef(messages.length);
 
-  // Auto-scroll like ChatGPT on new user message or AI answer
+  // Auto-scroll logic like ChatGPT:
+  // When user sends a message, scroll so the question is visible.
+  // When AI answers, scroll to TOP of that assistant message to show where answer starts.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    if (messages.length === 0) {
+      prevMessagesLengthRef.current = 0;
+      return;
+    }
+
+    const isNew = messages.length > prevMessagesLengthRef.current;
+    prevMessagesLengthRef.current = messages.length;
+
+    if (isNew) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg.sender === 'assistant') {
+        const el = document.getElementById(`msg-${lastMsg.id}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          setTimeout(() => {
+            document.getElementById(`msg-${lastMsg.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 60);
+        }
+      } else {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    }
   }, [messages]);
 
   const compareEnabled = messages.some(m => m.sender === 'user') || messages.length > 0;
@@ -180,7 +205,7 @@ export default function HomeView({
       </header>
 
       {/* Main Area: chat-scroll with zoom and scroll like ChatGPT */}
-      <div ref={homeScrollRef} className="chat-scroll flex-1 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth px-4 py-4 pb-4 flex flex-col min-h-0">
+      <div ref={homeScrollRef} className="chat-scroll flex-1 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth overscroll-contain px-4 py-4 pb-4 flex flex-col min-h-0">
         {compareMode ? (
           /* Compare Grid mode */
           <CompareGrid currentPrompt={comparePrompt} responses={compareResponses} />
@@ -201,16 +226,17 @@ export default function HomeView({
             {messages.map(msg => (
               <div
                 key={msg.id}
+                id={`msg-${msg.id}`}
                 className={`group w-full flex ${
                   msg.sender === 'user' ? 'justify-end' : 'justify-start'
-                }`}
+                } scroll-mt-4`}
               >
                 {msg.sender === 'user' ? (
                   /* USER MESSAGE: Right side like ChatGPT */
                   <div className="w-full flex justify-end items-start gap-2.5">
-                    <div className="max-w-[70%] ml-auto flex flex-col items-end">
+                    <div className="flex flex-col items-end max-w-[70%] md:max-w-[60%]">
                       {/* User bubble */}
-                      <div className="bg-[#2f2f2f] text-white rounded-2xl rounded-br-xs px-4 py-2.5 text-left border border-white/10 shadow-sm w-fit space-y-2">
+                      <div className="w-fit max-w-[70%] md:max-w-[60%] bg-[#2f2f2f] text-white rounded-2xl rounded-br-sm px-4 py-3 text-[14.5px] leading-6 whitespace-pre-wrap break-words border border-white/10 shadow-sm space-y-2">
                         {/* Attachment chips if any */}
                         {msg.attachments && msg.attachments.length > 0 && (
                           <div className="flex flex-wrap gap-2 pt-1">
@@ -262,7 +288,7 @@ export default function HomeView({
                             </div>
                           </div>
                         ) : (
-                          <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.text}</p>
+                          <p className="whitespace-pre-wrap">{msg.text}</p>
                         )}
                       </div>
 
@@ -283,16 +309,16 @@ export default function HomeView({
                   </div>
                 ) : (
                   /* AI MESSAGE: Left side like ChatGPT */
-                  <div className="w-full flex justify-start items-start gap-2.5">
+                  <div className="w-full flex justify-start items-start gap-3">
                     {/* Small AI avatar on left */}
                     <div className="w-7 h-7 rounded-full bg-[#2f2f2f] border border-white/10 flex items-center justify-center flex-shrink-0 mt-0.5 text-sky-400">
                       <Bot className="w-3.5 h-3.5" />
                     </div>
 
-                    <div className="max-w-[80%] mr-auto flex flex-col items-start">
+                    <div className="flex flex-col items-start max-w-[80%] md:max-w-[75%]">
                       {/* AI bubble */}
-                      <div className="bg-[#212121] text-white rounded-2xl rounded-bl-xs px-4 py-2.5 text-left border border-white/10 shadow-sm w-full space-y-2">
-                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-100">{msg.text}</p>
+                      <div className="w-fit max-w-[80%] md:max-w-[75%] bg-[#2f2f2f]/60 border border-white/5 rounded-2xl rounded-bl-sm px-4 py-3 text-[14.5px] leading-6 whitespace-pre-wrap break-words text-left text-white shadow-sm space-y-2">
+                        <p className="whitespace-pre-wrap text-zinc-100">{msg.text}</p>
                       </div>
 
                       {/* Below AI bubble: action row Copy Sound Retry Download left aligned */}

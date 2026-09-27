@@ -166,7 +166,7 @@ export default function Sidebar({
         <div className="my-2 border-t border-white/10" />
 
         {/* Chat History Section */}
-        <div className="flex-1 flex flex-col overflow-hidden px-3">
+        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto px-3">
           <div className="flex items-center justify-between px-3 py-1.5">
             <span className="text-[11px] font-semibold tracking-wider text-zinc-500 uppercase">
               CHAT HISTORY
