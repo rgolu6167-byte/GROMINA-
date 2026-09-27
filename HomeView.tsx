@@ -169,7 +169,7 @@ export default function HomeView({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full min-h-0 max-h-full w-full min-w-0 bg-[#212121] relative overflow-hidden [touch-action:pan-x_pan-y_pinch-zoom]">
+    <div className="flex-1 flex flex-col h-full min-h-0 w-full min-w-0 bg-[#212121] relative overflow-hidden [touch-action:pan-x_pan-y_pinch-zoom]">
       {/* Top bar with Compare button */}
       <header className="h-14 bg-[#171717] border-b border-white/10 flex justify-between items-center px-4 flex-shrink-0 z-10 w-full">
         <div className="flex items-center gap-2.5">
@@ -197,12 +197,12 @@ export default function HomeView({
       </header>
 
       {/* Main Area: FIXED - zoom scroll up-down left-right both */}
-      <div ref={homeScrollRef} className="chat-scroll flex-1 w-full min-w-0 min-h-0 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth overscroll-contain px-4 py-4 pb-4 flex flex-col">
+      <div ref={homeScrollRef} className="chat-scroll flex-1 w-full min-w-0 min-h-0 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth overscroll-contain px-4 py-4 pb-6 flex flex-col">
         {compareMode ? (
           <CompareGrid currentPrompt={comparePrompt} responses={compareResponses} />
         ) : messages.length === 0 ? (
           /* Empty State - FIXED for zoom scroll */
-          <div className="flex-1 w-full min-w-0 min-h-[60vh] flex flex-col items-center justify-center text-center p-6 overflow-y-auto overflow-x-auto [touch-action:pan-x_pan-y_pinch-zoom]">
+          <div className="flex-1 w-full min-w-0 min-h-[60vh] flex flex-col items-center justify-center text-center p-6">
             <div className="w-16 h-16 rounded-full bg-[#2f2f2f] border border-white/10 flex items-center justify-center mb-5 shadow-lg shrink-0">
               <span className="text-2xl font-bold text-white">G</span>
             </div>

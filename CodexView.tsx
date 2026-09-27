@@ -244,7 +244,7 @@ export default function CodexView({
   const currentFile = files[selectedFileIndex] || null;
 
   return (
-    <div className="flex-1 flex flex-col h-full min-h-0 max-h-full bg-[#212121] overflow-hidden [touch-action:pan-x_pan-y_pinch-zoom]">
+    <div className="flex-1 flex flex-col min-h-0 bg-[#212121] [touch-action:pan-x_pan-y_pinch-zoom]">
       {/* Top bar h-14 bg #171717 border-b white/10 flex justify-between px-4 */}
       <header className="h-14 bg-[#171717] border-b border-white/10 flex justify-between items-center px-4 flex-shrink-0">
         <div className="flex items-center gap-2.5">

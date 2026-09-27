@@ -253,7 +253,7 @@ export default function TeacherView({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full min-h-0 max-h-full bg-[#212121] relative overflow-hidden [touch-action:pan-x_pan-y_pinch-zoom]">
+    <div className="flex-1 flex flex-col h-full min-h-0 bg-[#212121] relative [touch-action:pan-x_pan-y_pinch-zoom]">
       {/* Top bar with Gromina header (Fix 6), centered pill toggle and right-side Compare button */}
       <header className="h-14 bg-[#171717] border-b border-white/10 flex justify-between items-center px-4 flex-shrink-0 z-10">
         <div className="flex items-center gap-2.5">

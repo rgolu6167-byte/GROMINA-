@@ -277,7 +277,7 @@ export default function BusinessView({
 
   // State 2: Created (Testing & Channel integrations)
   return (
-    <div className="flex-1 flex flex-col h-full min-h-0 max-h-full bg-[#212121] overflow-hidden relative [touch-action:pan-x_pan-y_pinch-zoom]>
+    <div className="flex-1 flex flex-col min-h-0 bg-[#212121] relative [touch-action:pan-x_pan-y_pinch-zoom]">
       <div className="flex-1 overflow-y-auto overflow-x-auto px-4 py-6 pb-4 min-h-0 [touch-action:pan-x_pan-y_pinch-zoom] [-webkit-overflow-scrolling:touch] scroll-smooth">
         <div className="max-w-3xl mx-auto space-y-8 pb-10">
           {/* Summary Card */}

@@ -182,7 +182,7 @@ export default function BottomInputBar({
 
   return (
     <div
-      className="max-w-3xl mx-auto p-3 bg-[#212121] z-20 w-full shrink-0 flex-none [touch-action:manipulation]"
+      className="max-w-3xl mx-auto p-3 bg-[#212121] z-20 w-full shrink-0 [touch-action:manipulation]"
     >
       {/* File chips above bar */}
       {attachments.length > 0 && (
